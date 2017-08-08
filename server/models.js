@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const LOGDNA_DB = 'logdna';
 
 var createdModifiedPlugin = function(schema, options) {
     schema.add({ _created: Date });
@@ -18,6 +19,8 @@ var createdModifiedPlugin = function(schema, options) {
     }
 };
 
+var ModelRegister = {};
+
 /* Model Wrapping Object */
 var Model = function(name, schema, indexes, db, opts) {
     this.name = name;
@@ -31,6 +34,22 @@ var Model = function(name, schema, indexes, db, opts) {
         register.push(this);
         ModelRegister[db] = register;
     }
+};
+
+Model.prototype.getModel = function(conn, collection, buildIndex) {
+    var m = conn || mongoose; // Try to use the supplied mongoose connection to build the model from, otherwise fallback to mongoose default
+    var s = this.schema;
+    if (buildIndex && this.indexes.length > 0) {
+        for (var i = 0, len = this.indexes.length, iArgs; i < len; i++) {
+            iArgs = this.indexes[i];
+            if (iArgs instanceof Array) {
+                s.index.apply(s, iArgs);
+            } else {
+                s.index.call(s, iArgs);
+            }
+        }
+    }
+    return m.model(this.name, s, collection);
 };
 
 var DBModels = (function() {
@@ -60,8 +79,9 @@ var DBModels = (function() {
           , [
                 [{ url: 1 }, { unique: true }]
               , [{ company: 1 }, { unique: true }]
+              , [{ email: 1 }, { unique: true }]
             ]
-          , CRM_DB
+          , LOGDNA_DB
         )
     };
 })();

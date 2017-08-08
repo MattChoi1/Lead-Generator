@@ -11,13 +11,13 @@ app.post('/', function (req, res) {
   var domain = req.headers.domain;
   var personName = req.headers.name;
   var limit = req.headers.limit;
-  var wrapper = [[], [domain], [], [], []];
+  var wrapper = [, domain, , , , personName, limit];
   console.log('req.headers: ' + JSON.stringify(req.headers));
   oracle.search(wrapper, function(err, result) {
     if (err) {
         return;
     }
-    console.log('result: %j', result);
+    console.log('result in server: %j', result);
     return res.send(result);
   });
 });

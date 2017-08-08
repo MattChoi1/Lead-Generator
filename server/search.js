@@ -1,7 +1,8 @@
 const async = require('async');
-const clearbitEnrich = require('clearbit')('api_key');
-const clearbitProspect = require('clearbit')('api_key');
+const clearbitEnrich = require('clearbit')('APIKEY');
+const clearbitProspect = require('clearbit')('APIKEY');
 const _ = require('lodash');
+const mongoo = require('./mongo.js')
 var companyDomain;
 
 var small = [ // 1-10
@@ -826,25 +827,25 @@ var extraInfo = function (prospectemail, callback) { //finding linkedin and twit
     });
 };
 
-var basicInfo = function (person) { //getting basic info about people (name, email, title, verified)
+var basicInfo = function (person) { // getting basic info about people (name, email, title, verified)
     var basicInfoJSON = {};
     basicInfoJSON['firstname'] = person.name.givenName;
     basicInfoJSON['lastname'] = person.name.familyName;
     basicInfoJSON['email'] = person.email;
     basicInfoJSON['title'] = person.title;
     basicInfoJSON['validemail'] = person.verified;
-    return basicInfoJSON; //parsing information
+    return basicInfoJSON; // parsing information
 };
 
 
 
 function processIndividuals(payload, person, index, callback) {
-
+    console.log('person: ' + person);
     if (!payload.emailcache.includes(person.email) && person.title.indexOf('Strategy') === -1 && person.title.indexOf('Consultant') === -1) {
         payload.emailcache.push(person.email);
         var basicInfoJSON = basicInfo(person);
         if (payload.findextrainfo) {
-            extraInfo(basicInfoJSON['email'], function(err, extraInfoJSON) { //getting extra info
+            extraInfo(basicInfoJSON['email'], function(err, extraInfoJSON) { // getting extra info (Facebook, Linkedin, Twitter)
                 if (err) {
                     return callback(err);
                 } else {
@@ -855,7 +856,7 @@ function processIndividuals(payload, person, index, callback) {
                 }
             });
         } else {
-            payload.result.push(basicInfoJSON); //if there's nothing, put basic info into the payload
+            payload.result.push(basicInfoJSON); // if there's nothing, put basic info into the payload
             return callback(null, payload);
         }
     } else {
@@ -863,13 +864,13 @@ function processIndividuals(payload, person, index, callback) {
     }
 }
 
-function clearBitAPI(payload, filter, callback) { //pinging prospector api
+function clearBitAPI(payload, filter, callback) { // pinging prospector api
     if (payload.currentCount <= payload.stop && filter) {
         filter['domain'] = payload.url;
         filter.timeout = 30000;
         clearbitProspect.Prospector.search(filter)
         .then(function(people) {
-            payload.currentCount += people.length; //getting the current count and adding the number of people searched through prospector
+            payload.currentCount += people.length; // getting the current count and adding the number of people searched through prospector
             payload.total = _.concat(payload.total, people);
             return callback(null, payload);
         });
@@ -878,7 +879,7 @@ function clearBitAPI(payload, filter, callback) { //pinging prospector api
     }
 }
 
-function go(filterArray, payload, callback) { //pings clearbit and then proccessing individuals once getting a batch of people
+function go(filterArray, payload, callback) { // pings clearbit and then proccessing individuals once getting a batch of people
     async.mapSeries(filterArray, clearBitAPI.bind(clearBitAPI, payload), function(err, result) {
         async.transform(payload.total, payload, processIndividuals, function(err, result) {
             delete result.total;
@@ -891,21 +892,32 @@ function go(filterArray, payload, callback) { //pings clearbit and then proccess
 var findLeads = function(payload, callback) {
     // console.log('payload man: ' + payload.companyDetails['size']);
     var size = payload.companyDetails['size'];
-    ;
+
+    if (payload.specificPerson) {
+        var custom_filter = [{
+            domain: payload.url
+            , name: payload.specificPerson
+            , limit: payload.stop || 3
+            // In case there are people with the same names, default limit to 3 people.
+        }];
+
+        return go(custom_filter, payload, callback);
+    }
+
     if (size === '1000+') { // Large Company
-        payload.stop = large_stop;
+        if (!payload.stop) { payload.stop = large_stop; }
         go(large, payload, callback);
     } else if (size === '251-1000') { // Medium Company
-        payload.stop = medium_large_stop;
+        if (!payload.stop) { payload.stop = medium_large_stop; }
         go(medium_large, payload, callback);
     } else if (size === '51-250') {
-        payload.stop = medium_stop;
+        if (!payload.stop) { payload.stop = medium_stop; }
         go(medium, payload, callback);
     } else if (size === '11-50') {
-        payload.stop = small_medium_stop;
+        if (!payload.stop) { payload.stop = small_medium_stop; }
         go(small_medium, payload, callback);
     } else { // Small Company
-        payload.stop = small_stop;
+        if (!payload.stop) { payload.stop = small_stop; }
         go(small, payload, callback);
     }
 };
@@ -913,11 +925,13 @@ var findLeads = function(payload, callback) {
 
 
 exports.search = function(companies, callback) {
-    var name = companies[0][0];
-    var url = companies[1][0]; // URL
-    var size = companies[2][0]; // SIZE
-    var extra = companies[3][0]; // want LINKEDIN FACEBOOK TWITTER?
-    var location = companies[4][0];
+    var name = companies[0];
+    var url = companies[1]; // URL
+    var size = companies[2]; // SIZE
+    var extra = companies[3]; // want LINKEDIN FACEBOOK TWITTER?
+    var location = companies[4];
+    var specificPerson = companies[5];
+    var customLimit = companies[6];
 
     if (url) {
         var result = [];
@@ -926,12 +940,13 @@ exports.search = function(companies, callback) {
         var payload = {
             total: []
             , result: result
-            , currentCount: 0
+            , currentCount: 1
             , emailcache: emailcache
             , companyDetails: companyDetails
-            , stop: 0
+            , stop: (!(customLimit === 'null' || customLimit === 0) ? customLimit : 0)
             , url: url.toString()
-            , findextrainfo: extra || false
+            , findextrainfo: (extra || false)
+            , specificPerson: (specificPerson || null)
         };
 
         if (size) {         // If size exists in imported csv, dont call clearbit Enrich API
@@ -954,7 +969,18 @@ exports.search = function(companies, callback) {
             payload.companyDetails['address'] = location;
             payload.companyDetails['url'] = url;
             payload.companyDetails['name'] = name;
-            findLeads(payload, callback);
+            findLeads(payload, function(err, result){
+                if (err) {
+                    return callback(err);
+                }
+                mongoo.flatten(result, function(err, finalresult){
+                    if(err) { //finalresult is the new core
+                        return callback(err);
+                    }
+                    callback(null,finalresult);
+                    return;
+                });
+            });
 
         } else {
             clearbitEnrich.Company.find({ domain: payload.url, timeout: 30000 }) // getting company size and other information about a company
@@ -964,7 +990,18 @@ exports.search = function(companies, callback) {
                 payload.companyDetails['url'] = company.domain;
                 payload.companyDetails['name'] = company.legalName || company.name;
                 console.log('Company Size: ' + payload.size);
-                findLeads(payload, callback);
+                findLeads(payload, function(err, result){
+                    if (err) {
+                        return calback(err);
+                    }
+                    mongoo.flatten(result, function(err, finalresult){
+                        if(err) { //finalresult is the new core
+                            return callback(err);
+                        }
+                        callback(null, finalresult);
+                        return;
+                    });
+                });
             });
         }
     }

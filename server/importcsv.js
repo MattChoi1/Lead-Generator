@@ -61,9 +61,10 @@ function getWebsites() {
             company.push.apply(company, [name, website, size, extra, location]);
             companies.push(company);
         }
-        console.log('first getwebsite companies: ' + url);
+        console.log('each company: ' + company);
     })
     .on('done', (error)=>{
+        console.log('Companies: ' + companies);
         if (error) {
            console.log('Error occured converting from csv to json: ' + error);
         }
@@ -86,12 +87,11 @@ var createLeadsDB = function(obj, callback) {
 
 function start(companies) {
     console.log('checkpoint2');
-    async.mapSeries(companies, clearbit.search, function(err, result) {
+    async.mapSeries(companies, clearbit.search, function(err, core) { //result is now core
         if (err) {
             console.log('Error in clearbit');
         }
         console.log('checkpoint3: companies: ' + companies);
-        var core = csvFormatter(result); // format results
         console.log('\n\nCORE Result: %s', JSON.stringify(core, null, 4));
         tocsv.go(core, function(error) {
             if (error) {
@@ -112,50 +112,8 @@ function start(companies) {
     });
 }
 
-function csvFormatter(list) { // ordering people and formatting the raw data
-    var listToAppend = [];
-    for (var i = 0; i < list.length; i++) {
-        var peoplePerCompany = list[i].result.length;
-        for (var j=0; j < peoplePerCompany; j++) {
-            var beforeOrdered = _.merge(list[i].result[j], list[i].companyDetails);
-            var afterOrdered = rearrange(beforeOrdered);
-            listToAppend.push(afterOrdered);
-        }
-    }
-    return listToAppend;
-}
-
-function rearrange(before) {
-
-    // Preserve the order
-    var after = {};
-    after.companyname = before.name;
-    after.firstname = before.firstname;
-    after.lastname = before.lastname;
-    after.title = before.title;
-    after.email = before.email;
-    after.website = before.url;
-    after.validmail = before.validemail;
-    after.reason = 'Fill in';
-    after.extraspace = '            ';
-    after.linkedin = '';
-    after.tweeter = '';
-    after.facebook = '';
-
-    if (before.linkedin) {after.linkedin = 'https://' + before.linkedin; }
-    if (before.tweeter) {after.tweeter = 'https://' + before.tweeter;}
-    if (before.facebook) {after.facebook = 'https://' + before.facebook;}
-
-    after.address = before.address;
-    after.size = before.size;
-    after.status = '';
-    return after;
-}
-
 function main() {
     getWebsites();
-    console.log('checkpoint1: ' + companies);
-
 }
 
 main();
