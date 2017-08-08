@@ -1,0 +1,16 @@
+{
+  "name": "oracle",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "concurrently": "^3.5.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+    , "start": "concurrently \"cd client && npm start\" \"cd server && node server.js\""
+  },
+  "author": "",
+  "license": "ISC"
+}
