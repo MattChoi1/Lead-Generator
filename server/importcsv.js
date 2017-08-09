@@ -1,4 +1,4 @@
-const csvFilePath = 'testingcsv.csv';
+const csvFilePath = __dirname + '/testingcsv.csv';
 const csv = require('csvtojson');
 const clearbit = require('./search.js');
 const tocsv = require('./exportcsv.js');
