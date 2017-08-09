@@ -99,6 +99,7 @@ function start(companies) {
                 return;
             }
             console.log('end');
+            quit();
             return;
         });
         /*
@@ -115,6 +116,12 @@ function start(companies) {
 
 function main() {
     getWebsites();
+}
+
+function quit() {
+    setTimeout(function() {
+        process.exit(0);
+    }, 1000);
 }
 
 main();

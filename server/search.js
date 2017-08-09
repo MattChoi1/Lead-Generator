@@ -3,7 +3,7 @@ const async = require('async');
 const clearbitEnrich = require('clearbit')(process.env.clearbitAPI);
 const clearbitProspect = require('clearbit')(process.env.clearbitAPI);
 const _ = require('lodash');
-//const mongoo = require('./mongo.js')
+const mongoo = require('./mongo.js')
 var companyDomain;
 
 var small = [ // 1-10
@@ -984,20 +984,9 @@ exports.search = function(companies, callback) {
             payload.companyDetails['url'] = url;
             payload.companyDetails['name'] = name;
 
-            findLeads(payload, callback); //{
-                // if (err) {
-                //     return callback(err);
-                // }/*
-                // mongoo.flatten(result, function(err, finalresult){
-                //     //console.log('done with mongo');
-                //     if(err) { //finalresult is the new core
-                //         return callback(err);
-                //     }
-                //     callback(null,finalresult);
-                //     return;
-                // });*/
-                //return callback(null, result);
-            //});
+            findLeads(payload, function(err, resulty) {
+                mongoo.create(resulty, callback);
+            });
 
         } else {
             clearbitEnrich.Company.find({ domain: payload.url, timeout: 30000 }) // getting company size and other information about a company
@@ -1007,21 +996,9 @@ exports.search = function(companies, callback) {
                 payload.companyDetails['url'] = company.domain;
                 payload.companyDetails['name'] = company.legalName || company.name;
                 console.log('Company Size: ' + payload.size);
-                findLeads(payload, callback); //{
-//                     if (err) {
-//                         return callback(err);
-
-//                     }
-// >>>>>>> dynatic title
-//                     mongoo.flatten(result, function(err, finalresult){
-//                         if(err) { //finalresult is the new core
-//                             return callback(err);
-//                         }
-//                         callback(null, finalresult);
-//                         return;
-//                     });
-//                     return callback(null, result);
-//                 });
+                findLeads(payload, function(err, resulty) {
+                     mongoo.create(resulty, callback);
+                });
             });
         }
     }

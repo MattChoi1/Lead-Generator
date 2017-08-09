@@ -3,7 +3,6 @@ var fs = require('fs');
 
 
 exports.go = function(data, callback) { // exporting the parsed data into a csv
-  console.log(JSON.stringify(data, null, 2));
   var fields = ['Company Name', 'First Name', 'Last Name', 'Title', 'Email', 'Website', 'Verified', 'Reason', ' ', 'LinkedIn', 'Twitter', 'Facebook', 'Address', 'Company Size', 'Status'];
   var newData = [];
   var next;
