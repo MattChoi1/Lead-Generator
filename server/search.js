@@ -1,8 +1,9 @@
 const async = require('async');
-const clearbitEnrich = require('clearbit')('');
-const clearbitProspect = require('clearbit')('');
-const mongoo = require('./mongo.js');
+
+const clearbitEnrich = require('clearbit')(process.env.clearbitAPI);
+const clearbitProspect = require('clearbit')(process.env.clearbitAPI);
 const _ = require('lodash');
+//const mongoo = require('./mongo.js')
 var companyDomain;
 
 var small = [ // 1-10
@@ -871,6 +872,7 @@ function clearBitAPI(payload, filter, callback) { // pinging prospector api
         clearbitProspect.Prospector.search(filter)
         .then(function(people) {
             payload.currentCount += people.length; // getting the current count and adding the number of people searched through prospector
+            console.log('currentcount: ' + payload.currentCount);
             payload.total = _.concat(payload.total, people);
             return callback(null, payload);
         })
@@ -907,10 +909,10 @@ var findLeads = function(payload, callback) {
         var custom_filter = [{
             domain: payload.url
             , name: payload.specificPerson
-            , limit: payload.stop || 3
+            , limit: payload.stop || 3 // Get max of 3 people with the same name
             // In case there are people with the same names, default limit to 3 people.
         }];
-
+        payload.stop = 1; // Search once => max 3 people
         return go(custom_filter, payload, callback);
     }
 
@@ -953,7 +955,7 @@ exports.search = function(companies, callback) {
             , currentCount: 1
             , emailcache: emailcache
             , companyDetails: companyDetails
-            , stop: (!(customLimit === 'null' || customLimit === 0) ? customLimit : 0)
+            , stop: (!(customLimit === 'null' || customLimit === 0 || customLimit==="") ? customLimit : undefined)
             , url: url.toString()
             , findextrainfo: (extra || false)
             , specificPerson: (specificPerson || null)
@@ -979,12 +981,11 @@ exports.search = function(companies, callback) {
             payload.companyDetails['address'] = location;
             payload.companyDetails['url'] = url;
             payload.companyDetails['name'] = name;
-            console.log("PAYLOAD: %j",payload);
-            findLeads(payload, function(err, result){
-                console.log('done with clearbit!');
+
+            findLeads(payload, function(err, result) {
                 if (err) {
                     return callback(err);
-                }
+                }/*
                 mongoo.flatten(result, function(err, finalresult){
                     //console.log('done with mongo');
                     if(err) { //finalresult is the new core
@@ -992,7 +993,8 @@ exports.search = function(companies, callback) {
                     }
                     callback(null,finalresult);
                     return;
-                });
+                });*/
+                return callback(null, result);
             });
 
         } else {
@@ -1003,17 +1005,20 @@ exports.search = function(companies, callback) {
                 payload.companyDetails['url'] = company.domain;
                 payload.companyDetails['name'] = company.legalName || company.name;
                 console.log('Company Size: ' + payload.size);
-                findLeads(payload, function(err, result){
+                findLeads(payload, function(err, result) {
                     if (err) {
                         return callback(err);
-                    }
+
+                    }/*
+>>>>>>> dynatic title
                     mongoo.flatten(result, function(err, finalresult){
                         if(err) { //finalresult is the new core
                             return callback(err);
                         }
                         callback(null, finalresult);
                         return;
-                    });
+                    });*/
+                    return callback(null, result);
                 });
             });
         }

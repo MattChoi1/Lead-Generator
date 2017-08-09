@@ -86,7 +86,6 @@ var createLeadsDB = function(obj, callback) {
 */
 
 function start(companies) {
-    console.log('checkpoint2');
     async.mapSeries(companies, clearbit.search, function(err, core) { //result is now core
         if (err) {
             console.log('Error in clearbit');

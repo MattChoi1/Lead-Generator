@@ -50,9 +50,14 @@
     width: 70px;
 }
 
-.title-not-active {
+.title {
     font-size: 20px;
     margin-bottom: 30px;
+}
+
+.title-hidden {
+    transition: top 0.3s ease-in;
+    display:none;
 }
 
 .search-bar:focus {
@@ -71,12 +76,16 @@
     position: relative;
     top: 40%;
     transform: translateY(-50%);
-    transition: top 0.5s linear;
+    transition: top 0.1s linear;
 }
 
 .main-active {
     position: relative;
-    top: 30%;
+    top: 10%;
     transform: translateY(-50%);
-    transition: top 0.5s linear;
+    transition: top 0.3s ease-in;
+}
+
+.hidden {
+    display: none;
 }

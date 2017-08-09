@@ -11,23 +11,32 @@ class Body extends Component {
         this.state = {
             domain: ''
             , name: ''
-            , limit: null
+            , limit: ''
             , value: ''
+            , mainClassActive: "main-not-active"
+            , titleShow: "title"
         };
         this.storeValues = this.storeValues.bind(this);
         this.submitToServer = this.submitToServer.bind(this);
-        this.changeMainClass = this.changeMainClass.bind(this);
+        this.slideMain = this.slideMain.bind(this);
+        this.originalMain = this.originalMain.bind(this);
     }
 
-    changeMainClass(e) {
-        console.log('wqeqweqweqw@@@');
-        console.log('e.target: ' + e.target);
-        e.target.className = "main-active";
+
+
+    slideMain() {
+        this.setState({mainClassActive: "main-active", titleShow:"hidden"});
     }
+
+    originalMain() {
+        this.setState({mainClassActive: "main-not-active", titleShow:"title"})
+    }
+
 
     storeValues(e) {
         var stateID = e.target.id;
         var value = e.target.value;
+
         if (stateID === "domain") {
             this.setState({domain: value});
         } else if (stateID === "name") {
@@ -35,6 +44,8 @@ class Body extends Component {
         } else if (stateID === "limit") {
             this.setState({limit: value});
         }
+
+
 
     }
 
@@ -64,7 +75,7 @@ class Body extends Component {
 
         var result = {
             "position": "relative"
-            , "top": "40%"
+            , "top": "20%"
             , "transform": "translateY(-50%)"
             , "transition": "top 0.5s linear"
         }
@@ -76,9 +87,12 @@ class Body extends Component {
 
         return (
             <div style={background}>
-                <div className="main-not-active">
-                    <p className="title-not-active">LogDNA Oracle</p>
-                    <form onSubmit={this.submitToServer}>
+                <div className={this.state.mainClassActive}>
+                    <p className={this.state.titleShow}>LogDNA Oracle</p>
+                    <form onSubmit={ (e) => {
+                        this.submitToServer(e);
+                        this.slideMain();
+                    }}>
                         <FormGroup>
                           <input id="domain" className="search-bar" type="text" placeholder="Company Domain" onChange={this.storeValues}/>
                           <input id="name" className="search-bar" type="text" placeholder="Employee Name (Optional)" onChange={this.storeValues}/>
@@ -88,7 +102,7 @@ class Body extends Component {
                     </form>
                 </div>
                 <div style={result}>
-                    <p ref="display_result" onChange={this.changeMainClass}>{this.state.value}</p>
+                    <p>{this.state.value}</p>
                 </div>
             </div>
 
