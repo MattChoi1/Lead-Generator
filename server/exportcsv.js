@@ -7,67 +7,70 @@ exports.go = function(data, callback) { // exporting the parsed data into a csv
   var fields = [];
 
   var next;
+  var result;
   for (var i = 0; i < data.length; i++) {
     next = data[i];
-    fields.push({
-        label: 'Company Name'
-        , value: next.companyDetails.name
+    for (var j = 0; j < next.result.length; j++) {
+            fields.push({
+                label: 'Company Name'
+                , value: next.companyDetails.name
+            }
+            , {
+                label: 'First Name'
+                , value: next.result[j].firstname
+            }
+            , {
+                label: 'Last Name'
+                , value: next.result[j].lastname
+            }
+            , {
+                label: 'Title'
+                , value: next.result[j].title
+            }
+            , {
+                label: 'Email'
+                , value: next.result[j].email
+            }
+            , {
+                label: 'Website'
+                , value: next.companyDetails.url
+            }
+            , {
+                label: 'Verified'
+                , value: next.result[j].validemail
+            }
+            , {
+                label: 'Reason'
+                , value: null
+            }
+            , {
+                label: ' '
+                , value: ' '
+            }
+            , {
+                label: 'LinkedIn'
+                , value: next.result[j].linkedin
+            }
+            , {
+                label: 'Twitter'
+                , value: next.result[j].twitter
+            }, {
+                label: 'Facebook'
+                , value: next.result[j].facebook
+            }
+            , {
+                label: 'Address'
+                , value: next.companyDetails.address
+            }
+            , {
+                label: 'Company Size'
+                , value: next.companyDetails.size
+            }
+            , {
+                label: 'Status'
+                , value: 'searched'
+            });
     }
-    , {
-        label: 'First Name'
-        , value: next.result[0].firstname
-    }
-    , {
-        label: 'Last Name'
-        , value: next.result[0].lastname
-    }
-    , {
-        label: 'Title'
-        , value: next.result[0].title
-    }
-    , {
-        label: 'Email'
-        , value: next.result[0].email
-    }
-    , {
-        label: 'Website'
-        , value: next.companyDetails.url
-    }
-    , {
-        label: 'Verified'
-        , value: next.result[0].validemail
-    }
-    , {
-        label: 'Reason'
-        , value: null
-    }
-    , {
-        label: ' '
-        , value: ' '
-    }
-    , {
-        label: 'LinkedIn'
-        , value: next.result[0].linkedin
-    }
-    , {
-        label: 'Twitter'
-        , value: next.result[0].twitter
-    }, {
-        label: 'Facebook'
-        , value: next.result[0].facebook
-    }
-    , {
-        label: 'Address'
-        , value: next.companyDetails.address
-    }
-    , {
-        label: 'Company Size'
-        , value: next.companyDetails.size
-    }
-    , {
-        label: 'Status'
-        , value: 'searched'
-    });
   }
 
   var csv = json2csv({ data: data, fields: fields}); // format of the csv
