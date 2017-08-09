@@ -53,12 +53,12 @@ function getWebsites() {
         // console.log('Just printing out company size: ' + JSON.stringify(jsonObj, null, 2));
 
         if (url) { // if the url exists then you push things into different arrays so that it can be exported into a csv
-            name.push(companyname);
-            website.push(url);
-            size.push(companysize);
-            extra.push(extrainfo);
-            location.push(companylocation);
-            company.push.apply(company, [name, website, size, extra, location]);
+            // name.push(companyname);
+            // website.push(url);
+            // size.push(companysize);
+            // extra.push(extrainfo);
+            // location.push(companylocation);
+            company.push(companyname, url, companysize, extrainfo, companylocation);
             companies.push(company);
         }
         console.log('each company: ' + company);

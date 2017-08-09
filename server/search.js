@@ -1,8 +1,8 @@
 const async = require('async');
-const clearbitEnrich = require('clearbit')('APIKEY');
-const clearbitProspect = require('clearbit')('APIKEY');
+const clearbitEnrich = require('clearbit')('');
+const clearbitProspect = require('clearbit')('');
+const mongoo = require('./mongo.js');
 const _ = require('lodash');
-const mongoo = require('./mongo.js')
 var companyDomain;
 
 var small = [ // 1-10
@@ -873,16 +873,26 @@ function clearBitAPI(payload, filter, callback) { // pinging prospector api
             payload.currentCount += people.length; // getting the current count and adding the number of people searched through prospector
             payload.total = _.concat(payload.total, people);
             return callback(null, payload);
+        })
+        .catch(function(err){
+            return callback(err);
         });
     } else {
+        console.log('well shit');
         return callback(null, payload);
     }
 }
 
 function go(filterArray, payload, callback) { // pings clearbit and then proccessing individuals once getting a batch of people
+    console.log('about to be filtered!');
     async.mapSeries(filterArray, clearBitAPI.bind(clearBitAPI, payload), function(err, result) {
+        if(err){
+            console.log(err);
+        }
+        console.log('done filtering!');
         async.transform(payload.total, payload, processIndividuals, function(err, result) {
             delete result.total;
+            console.log('done finding info!');
             return callback(null, result);
         });
     });
@@ -969,11 +979,14 @@ exports.search = function(companies, callback) {
             payload.companyDetails['address'] = location;
             payload.companyDetails['url'] = url;
             payload.companyDetails['name'] = name;
+            console.log("PAYLOAD: %j",payload);
             findLeads(payload, function(err, result){
+                console.log('done with clearbit!');
                 if (err) {
                     return callback(err);
                 }
                 mongoo.flatten(result, function(err, finalresult){
+                    //console.log('done with mongo');
                     if(err) { //finalresult is the new core
                         return callback(err);
                     }
@@ -992,7 +1005,7 @@ exports.search = function(companies, callback) {
                 console.log('Company Size: ' + payload.size);
                 findLeads(payload, function(err, result){
                     if (err) {
-                        return calback(err);
+                        return callback(err);
                     }
                     mongoo.flatten(result, function(err, finalresult){
                         if(err) { //finalresult is the new core

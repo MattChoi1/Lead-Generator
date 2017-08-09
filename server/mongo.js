@@ -3,6 +3,7 @@ const models = require('./models.js');
 const ld = require('../../../ldshared/index.js');
 const quit = function() { setTimeout(function() { process.exit(0); }, 2000); };
 const async = require('async');
+const _ = require('lodash');
 
 var db = ld.createMongooseConnection();
 var Leads = models.Leads.getModel(db);
@@ -12,6 +13,7 @@ var creation = function(obj, callback) {
     console.log('AT CREATION');
     leads.create(obj.company, obj.url, obj.firstname, obj.lastname, obj.title, obj.email, obj.location, obj.companySize, obj.linkedin, obj.twitter, obj.facebook, obj.status, function(err, doc){
         if(err){
+            console.log('Error: %j', err);
             return callback(err);
         }
         else {
@@ -23,6 +25,7 @@ var creation = function(obj, callback) {
 }
 
 exports.flatten = function(list,callback) { // ordering people and formatting the raw data, takes in the raw result
+    console.log('about to flatten!');
     var listToAppend = [];
     // for (var i = 0; i < list.length; i++) {
     //     var peoplePerCompany = list[i].result.length;
@@ -37,6 +40,7 @@ exports.flatten = function(list,callback) { // ordering people and formatting th
         var afterOrdered = rearrange(beforeOrdered);
         listToAppend.push(afterOrdered);
     }
+    console.log('flattened!');
     console.log(listToAppend);
     orderAndMongo(listToAppend,function(err){//this is core
         if(err){
@@ -60,16 +64,16 @@ function rearrange(before) {
     after.reason = 'Fill in';
     after.extraspace = '            ';
     after.linkedin = '';
-    after.tweeter = '';
+    after.twitter = '';
     after.facebook = '';
 
     if (before.linkedin) {after.linkedin = 'https://' + before.linkedin; }
-    if (before.tweeter) {after.tweeter = 'https://' + before.tweeter;}
+    if (before.twitter) {after.twitter = 'https://' + before.twitter;}
     if (before.facebook) {after.facebook = 'https://' + before.facebook;}
 
     after.address = before.address;
     after.size = before.size;
-    after.status = '';
+    after.status = "searched";
     return after;
 }
 
@@ -80,7 +84,7 @@ var orderAndMongo = function(core,callback) {
     for (var i = 0; i < core.length; i++) {
         var createdObj = {};
         createdObj.company = core[i].companyname;
-        createdObj.url = core[i].url;
+        createdObj.url = core[i].website;
         createdObj.firstname = core[i].firstname;
         createdObj.lastname = core[i].lastname;
         createdObj.title = core[i].title;
