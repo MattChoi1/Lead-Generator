@@ -24,7 +24,7 @@ var creation = function(obj, callback) {
     });
 }
 
-exports.flatten = function(list,callback) { // ordering people and formatting the raw data, takes in the raw result
+exports.flatten = function(list, callback) { // ordering people and formatting the raw data, takes in the raw result
     console.log('about to flatten!');
     var listToAppend = [];
     // for (var i = 0; i < list.length; i++) {
@@ -42,13 +42,13 @@ exports.flatten = function(list,callback) { // ordering people and formatting th
     }
     console.log('flattened!');
     console.log(listToAppend);
-    orderAndMongo(listToAppend,function(err){//this is core
+    orderAndMongo(listToAppend, function(err) {//this is core
         if(err){
             return callback(err);
         }
         return callback(null,listToAppend);
     });
-}
+};
 
 function rearrange(before) {
 
