@@ -821,11 +821,13 @@ var extraInfo = function (prospectemail, callback) { //finding linkedin and twit
         if (person.twitter.handle) { extraInfoJSON['twitter'] = 'twitter.com/' + person.twitter.handle }
 
         return callback(null, extraInfoJSON);
-    })
-    .catch(function(err) {
-        console.log('why error');
-        return callback(err);
     });
+    // .catch(function(err) {
+    //     console.log('why error');
+    //     console.log('Error: %j', err);
+    //     return;
+    //     return callback(err);
+    // });
 };
 
 var basicInfo = function (person) { // getting basic info about people (name, email, title, verified)
@@ -872,7 +874,7 @@ function clearBitAPI(payload, filter, callback) { // pinging prospector api
         clearbitProspect.Prospector.search(filter)
         .then(function(people) {
             payload.currentCount += people.length; // getting the current count and adding the number of people searched through prospector
-            console.log('currentcount: ' + payload.currentCount);
+            //console.log('currentcount: ' + payload.currentCount);
             payload.total = _.concat(payload.total, people);
             return callback(null, payload);
         })
@@ -889,7 +891,7 @@ function go(filterArray, payload, callback) { // pings clearbit and then procces
     console.log('about to be filtered!');
     async.mapSeries(filterArray, clearBitAPI.bind(clearBitAPI, payload), function(err, result) {
         if(err){
-            console.log(err);
+            return callback(err);
         }
         console.log('done filtering!');
         async.transform(payload.total, payload, processIndividuals, function(err, result) {
@@ -913,7 +915,7 @@ var findLeads = function(payload, callback) {
             // In case there are people with the same names, default limit to 3 people.
         }];
         payload.stop = 1; // Search once => max 3 people
-        return go(custom_filter, payload, callback);
+        go(custom_filter, payload, callback);
     }
 
     if (size === '1000+') { // Large Company
@@ -982,20 +984,20 @@ exports.search = function(companies, callback) {
             payload.companyDetails['url'] = url;
             payload.companyDetails['name'] = name;
 
-            findLeads(payload, function(err, result) {
-                if (err) {
-                    return callback(err);
-                }/*
-                mongoo.flatten(result, function(err, finalresult){
-                    //console.log('done with mongo');
-                    if(err) { //finalresult is the new core
-                        return callback(err);
-                    }
-                    callback(null,finalresult);
-                    return;
-                });*/
-                return callback(null, result);
-            });
+            findLeads(payload, callback); //{
+                // if (err) {
+                //     return callback(err);
+                // }/*
+                // mongoo.flatten(result, function(err, finalresult){
+                //     //console.log('done with mongo');
+                //     if(err) { //finalresult is the new core
+                //         return callback(err);
+                //     }
+                //     callback(null,finalresult);
+                //     return;
+                // });*/
+                //return callback(null, result);
+            //});
 
         } else {
             clearbitEnrich.Company.find({ domain: payload.url, timeout: 30000 }) // getting company size and other information about a company
@@ -1005,21 +1007,21 @@ exports.search = function(companies, callback) {
                 payload.companyDetails['url'] = company.domain;
                 payload.companyDetails['name'] = company.legalName || company.name;
                 console.log('Company Size: ' + payload.size);
-                findLeads(payload, function(err, result) {
-                    if (err) {
-                        return callback(err);
+                findLeads(payload, callback); //{
+//                     if (err) {
+//                         return callback(err);
 
-                    }/*
->>>>>>> dynatic title
-                    mongoo.flatten(result, function(err, finalresult){
-                        if(err) { //finalresult is the new core
-                            return callback(err);
-                        }
-                        callback(null, finalresult);
-                        return;
-                    });*/
-                    return callback(null, result);
-                });
+//                     }
+// >>>>>>> dynatic title
+//                     mongoo.flatten(result, function(err, finalresult){
+//                         if(err) { //finalresult is the new core
+//                             return callback(err);
+//                         }
+//                         callback(null, finalresult);
+//                         return;
+//                     });
+//                     return callback(null, result);
+//                 });
             });
         }
     }

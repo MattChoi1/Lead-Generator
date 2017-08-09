@@ -88,13 +88,15 @@ var createLeadsDB = function(obj, callback) {
 function start(companies) {
     async.mapSeries(companies, clearbit.search, function(err, core) { //result is now core
         if (err) {
-            console.log('Error in clearbit');
+            console.log('Error: %j', err);
+            return;
         }
-        console.log('checkpoint3: companies: ' + companies);
-        console.log('\n\nCORE Result: %s', JSON.stringify(core, null, 4));
+        //console.log('checkpoint3: companies: ' + companies);
+        console.log('\n\ncheckpoint3 + CORE Result: %s', JSON.stringify(core, null, 4));
         tocsv.go(core, function(error) {
             if (error) {
                 console.log('Error occured converting from json back to csv: ' + error);
+                return;
             }
             console.log('end');
             return;
