@@ -47,7 +47,9 @@
 }
 
 .limit {
-    width: 70px;
+    border-top: 1px solid #92CD00;
+    border-bottom: 1px solid #92CD00;
+    width: 30px;
 }
 
 .title {
@@ -77,17 +79,13 @@
 }
 
 .main-not-active {
-    position: relative;
-    top: 40%;
-    transform: translateY(-50%);
-    transition: top 0.1s linear;
+    margin-top: 200px;
+    transition: margin 0.1s linear;
 }
 
 .main-active {
-    position: relative;
-    top: 10%;
-    transform: translateY(-50%);
-    transition: top 0.3s ease-in;
+    margin-top: -30px;
+    transition: margin 0.3s ease-in;
 }
 
 .result-hidden {
@@ -100,9 +98,20 @@
     display:show;
     opacity: 1;
     position: relative;
-    top: 20%;
+    margin-top: 100px;
     width: 85%;
     margin: auto;
-    transform: translateY(-50%);
     transition: top 2s linear;
 }
+
+.overflow_scroll {
+    overflow: scroll;
+}
+
+.contacted {
+    width:10px;
+    height:10px;
+    background: green;
+}
+
+

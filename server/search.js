@@ -993,7 +993,7 @@ exports.search = function(companies, callback) {
             clearbitEnrich.Company.find({ domain: payload.url, timeout: 30000 }) // getting company size and other information about a company
             .then(function(company) {
                 payload.companyDetails['size'] = company.metrics.employeesRange;
-                payload.companyDetails['address'] = company.geo.streetNumber + ' ' + company.geo.streetName + ' ' + company.geo.city + ' ' + company.geo.state + ' ' +company.geo.postalCode;
+                payload.companyDetails['address'] = (company.geo.streetNumber || '') + ' ' + (company.geo.streetName || '') + ' ' + (company.geo.city || '') + ' ' + (company.geo.state || '') + ' ' + (company.geo.postalCode || '');
                 payload.companyDetails['url'] = company.domain;
                 payload.companyDetails['name'] = company.legalName || company.name;
                 console.log('Company Size: ' + payload.size);
@@ -1001,6 +1001,7 @@ exports.search = function(companies, callback) {
                      mongoo.create(resulty, callback);
 
                      //return callback(err, resulty);
+
                 });
             });
         }
