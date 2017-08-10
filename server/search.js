@@ -3,7 +3,7 @@ const async = require('async');
 const clearbitEnrich = require('clearbit')(process.env.clearbitAPI);
 const clearbitProspect = require('clearbit')(process.env.clearbitAPI);
 const _ = require('lodash');
-const mongoo = require('./mongo.js')
+const mongoo = require('./mongo.js');
 var companyDomain;
 
 var small = [ // 1-10
@@ -985,7 +985,8 @@ exports.search = function(companies, callback) {
             payload.companyDetails['name'] = name;
 
             findLeads(payload, function(err, resulty) {
-                mongoo.create(resulty, callback);
+                //mongoo.create(resulty, callback);
+                return callback(err, resulty);
             });
 
         } else {
@@ -997,7 +998,9 @@ exports.search = function(companies, callback) {
                 payload.companyDetails['name'] = company.legalName || company.name;
                 console.log('Company Size: ' + payload.size);
                 findLeads(payload, function(err, resulty) {
-                     mongoo.create(resulty, callback);
+                     //mongoo.create(resulty, callback);
+
+                     return callback(err, resulty);
                 });
             });
         }

@@ -51,13 +51,17 @@
 }
 
 .title {
+    visibility: visible;
     font-size: 20px;
     margin-bottom: 30px;
+    opacity: 1;
+    transition: all 0.1s lienar;
 }
 
 .title-hidden {
-    transition: top 0.3s ease-in;
-    display:none;
+    transition: all 0.1s linear;
+    visibility: hidden;
+    opacity: 0;
 }
 
 .search-bar:focus {
@@ -86,6 +90,19 @@
     transition: top 0.3s ease-in;
 }
 
-.hidden {
-    display: none;
+.result-hidden {
+    display:none;
+    opacity: 0;
+    transition: all 10s linear;
+}
+
+.result {
+    display:show;
+    opacity: 1;
+    position: relative;
+    top: 20%;
+    width: 85%;
+    margin: auto;
+    transform: translateY(-50%);
+    transition: top 2s linear;
 }

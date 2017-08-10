@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "concurrently": "^3.5.0"
+    "concurrently": "^3.5.0",
+    "react-bootstrap-table": "^4.0.0"
   },
   "devDependencies": {},
   "scripts": {
