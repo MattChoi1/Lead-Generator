@@ -14,6 +14,7 @@ class Body extends Component {
             , name: ''
             , limit: ''
             , value: ''
+            , backgroundActive: "background"
             , mainClassActive: "main-not-active"
             , titleShow: "title"
             , resultOnOff: "result-hidden"
@@ -32,7 +33,7 @@ class Body extends Component {
 
 
     slideMain() {
-        this.setState({mainClassActive: "main-active", titleShow:"title-hidden", resultOnOff:"result"});
+        this.setState({mainClassActive: "main-active", titleShow:"title-hidden", resultOnOff:"result", backgroundActive:"background-active"});
 
     }
 
@@ -75,6 +76,7 @@ class Body extends Component {
     }
 
     submitToServer(e) {
+        console.log('row height: %j', e.target);
         fetch('http://localhost:4000/', {
             method: 'POST',
             headers: {
@@ -91,9 +93,6 @@ class Body extends Component {
 
                 var numberOfPeople = responseJSON.length;
                 for (var i=0; i<numberOfPeople; i++) {
-                    console.log('what does notsearchedyet return: ' + this.notSearchedYet(responseJSON[i].email));
-                    console.log('what is email cache: ' + this.state.emailcache);
-                    console.log('what is this guy email: ' + responseJSON[i].email);
                     if (this.notSearchedYet(responseJSON[i].email)) {
                         console.log('not searched bro');
                         var jsonObj = {
@@ -140,10 +139,7 @@ class Body extends Component {
 
     render() {
 
-        const background = {
-            "borderBottom": "1px solid #ddd"
-            , "height": "500px"
-        }
+
 
         const not_in_screen = {
             "position": "absolute"
@@ -159,7 +155,7 @@ class Body extends Component {
 
 
         return (
-            <div style={background}>
+            <div className={this.state.backgroundActive}>
                 <div className={this.state.mainClassActive}>
                     <p className={this.state.titleShow}>LogDNA Oracle</p>
                     <form onSubmit={ (e) => {
@@ -167,6 +163,7 @@ class Body extends Component {
                         if (this.state.domain !== '') {
                             this.submitToServer(e);
                             this.slideMain();
+
                         }
                     }}>
                         <FormGroup autoComplete="off">
@@ -177,10 +174,9 @@ class Body extends Component {
                         </FormGroup>
                     </form>
                 </div>
-                <div className={this.state.resultOnOff}>
+                <div className={this.state.resultOnOff} >
                     <BootstrapTable className="table_wrapper" data={this.state.json} striped={true} hover={true} cellEdit={ cellEditProp }>
-                      <TableHeaderColumn width="30px" editable={ false } dataField="priority" isKey={true} dataAlign="center" dataSort={true} tdstyle={{overflow: 'scroll'}}>Priority</TableHeaderColumn>
-                      <TableHeaderColumn width="40px" editable={ false } dataAlign="center" dataField="companyname" dataSort={true}>Company</TableHeaderColumn>
+                      <TableHeaderColumn width="40px" editable={ false } isKey={true} dataAlign="center" dataField="companyname" dataSort={true}>Company</TableHeaderColumn>
                       <TableHeaderColumn width="40px" editable={ false } dataAlign="center" dataField="firstname" dataSort={true}>First Name</TableHeaderColumn>
                       <TableHeaderColumn width="40px" editable={ false } dataAlign="center" dataField="lastname" dataSort={true} >Last Name</TableHeaderColumn>
                       <TableHeaderColumn width="80px" editable={ false } dataAlign="center" dataField="title" dataSort={true}>Title</TableHeaderColumn>

@@ -9,7 +9,7 @@ class Head extends Component {
                 <Navbar style={{background: "#fff"}}>
                     <Navbar.Header >
                       <Navbar.Brand >
-                        <a href="#">LogDNA</a>
+                        <a href="/">LogDNA</a>
                       </Navbar.Brand>
                       <Navbar.Toggle />
                     </Navbar.Header>
