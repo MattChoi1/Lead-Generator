@@ -6,25 +6,26 @@ exports.go = function(data, callback) { // exporting the parsed data into a csv
   var fields = ['Company Name', 'First Name', 'Last Name', 'Title', 'Email', 'Website', 'Verified', 'Reason', ' ', 'LinkedIn', 'Twitter', 'Facebook', 'Address', 'Company Size', 'Status'];
   var newData = [];
   var next;
+  //console.log('Final Data: %j', data);
   for (var i = 0; i < data.length; i++) {
     next = data[i];
-    for (var j = 0; j < next.result.length; j++) {
+    for (var j = 0; j < next.length; j++) {
             newData.push({
-                'Company Name': next.companyDetails.name
-                , 'First Name': next.result[j].firstname
-                , 'Last Name': next.result[j].lastname
-                , 'Title': next.result[j].title
-                , 'Email': next.result[j].email
-                , 'Website': next.companyDetails.url
-                , 'Verified': next.result[j].validemail
+                'Company Name': next[j].company
+                , 'First Name': next[j].firstname
+                , 'Last Name': next[j].lastname
+                , 'Title': next[j].title
+                , 'Email': next[j].email
+                , 'Website': next[j].url
+                , 'Verified': next[j].verified
                 , 'Reason': 'Fill In'
                 , ' ': ' '
-                , 'LinkedIn': next.result[j].linkedin
-                , 'Twitter': next.result[j].twitter
-                , 'Facebook': next.result[j].facebook
-                , 'Address': next.companyDetails.address
-                , 'Company Size': next.companyDetails.size
-                , 'Status': 'searched'
+                , 'LinkedIn': next[j].linkedin
+                , 'Twitter': next[j].twitter
+                , 'Facebook': next[j].facebook
+                , 'Address': next[j].location
+                , 'Company Size': next[j].companySize
+                , 'Status': next[j].status
             });
     }
   }

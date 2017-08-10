@@ -10,6 +10,7 @@ leads.init(Leads);
 
 exports.create = function(original, callback) {
     console.log('AT CREATION');
+    //console.log('ORIGINAL: %j', original);
     var newData = [];
     for (var j = 0; j < original.result.length; j++) {
             newData.push({
@@ -19,14 +20,16 @@ exports.create = function(original, callback) {
                 , 'title': original.result[j].title
                 , 'email': original.result[j].email
                 , 'url': original.companyDetails.url
+                , 'verified': original.result[j].validemail
                 , 'linkedin': original.result[j].linkedin
                 , 'twitter': original.result[j].twitter
                 , 'facebook': original.result[j].facebook
                 , 'location': original.companyDetails.address
                 , 'companySize': original.companyDetails.size
-                , 'status': 'searched'
+                , 'status': 'New to Mongo!'
             });
     }
+    console.log('NEW DATA: %j',newData);
 
     async.eachSeries(newData, function(item, cb) {
         leads.create(item.company, item.url, item.firstname, item.lastname, item.title, item.email, item.linkedin, item.twitter, item.facebook, item.location, item.compnaySize, item.status, function(err, doc) {
@@ -43,7 +46,7 @@ exports.create = function(original, callback) {
             return callback(err);
         } else {
             console.log('Yay!');
-            return callback(null, original);
+            return callback(null, newData);
         }
     });
 };
