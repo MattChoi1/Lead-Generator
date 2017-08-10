@@ -34,7 +34,7 @@ var createMongooseConnection = function(mongoOptions) {
         console.log('Mongoose connected to DB: ' + db);
     });
     connection.on('error', function(err) {
-        console.log('Mongoose connection error: ' + util.inspect(err), 'e');
+        console.log('Mongoose connection error');
         console.log('Mongoose connection string: ' + connStr);
     });
     connection.on('disconnected', function() {

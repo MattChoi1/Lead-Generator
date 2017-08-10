@@ -89,31 +89,31 @@ class Body extends Component {
         .then((responseJSON) =>
             {
 
-                var numberOfPeople = responseJSON.result.length;
+                var numberOfPeople = responseJSON.length;
                 for (var i=0; i<numberOfPeople; i++) {
-                    console.log('what does notsearchedyet return: ' + this.notSearchedYet(responseJSON.result[i].email));
+                    console.log('what does notsearchedyet return: ' + this.notSearchedYet(responseJSON[i].email));
                     console.log('what is email cache: ' + this.state.emailcache);
-                    console.log('what is this guy email: ' + responseJSON.result[i].email);
-                    if (this.notSearchedYet(responseJSON.result[i].email)) {
+                    console.log('what is this guy email: ' + responseJSON[i].email);
+                    if (this.notSearchedYet(responseJSON[i].email)) {
                         console.log('not searched bro');
                         var jsonObj = {
                             priority: i
-                            , companyname: responseJSON.companyDetails.name
-                            , firstname: responseJSON.result[i].firstname
-                            , lastname: responseJSON.result[i].lastname
-                            , title: responseJSON.result[i].title
-                            , email: responseJSON.result[i].email
-                            , website: responseJSON.companyDetails.url
-                            , verified: responseJSON.result[i].validemail
-                            , linkedin: responseJSON.result[i].linkedin || ' '
-                            , twitter: responseJSON.result[i].twitter || ' '
-                            , facebook: responseJSON.result[i].facebook || ' '
-                            , address: responseJSON.companyDetails.address
-                            , size: responseJSON.companyDetails.size
-                            , status: responseJSON.result[i].status || ' '
+                            , companyname: responseJSON[i].company
+                            , firstname: responseJSON[i].firstname
+                            , lastname: responseJSON[i].lastname
+                            , title: responseJSON[i].title
+                            , email: responseJSON[i].email
+                            , website: responseJSON[i].url
+                            , verified: responseJSON[i].verified
+                            , linkedin: responseJSON[i].linkedin || ' '
+                            , twitter: responseJSON[i].twitter || ' '
+                            , facebook: responseJSON[i].facebook || ' '
+                            , address: responseJSON[i].location || ' '
+                            , size: responseJSON[i].companySize
+                            , status: responseJSON[i].status || ' '
                         }
                         this.setState({
-                            emailcache: [...this.state.emailcache, responseJSON.result[i].email],
+                            emailcache: [...this.state.emailcache, responseJSON[i].email],
                             json: [ ...this.state.json, jsonObj],
                             value: JSON.stringify(responseJSON)
                         });
