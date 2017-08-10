@@ -1,6 +1,6 @@
 const leads = require('./leads.js');
 const models = require('./models.js');
-const ld = require('../../../ldshared/index.js');
+const ld = require('./mongoose.js');
 const async = require('async');
 const _ = require('lodash');
 
@@ -29,7 +29,7 @@ exports.create = function(original, callback) {
                 , 'status': 'New to Mongo!'
             });
     }
-    console.log('NEW DATA: %j',newData);
+    //console.log('NEW DATA: %j',newData);
 
     async.eachSeries(newData, function(item, cb) {
         leads.create(item.company, item.url, item.firstname, item.lastname, item.title, item.email, item.linkedin, item.twitter, item.facebook, item.location, item.compnaySize, item.status, function(err, doc) {
