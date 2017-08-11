@@ -21,6 +21,7 @@ class Body extends Component {
             , resultOnOff: "result-hidden"
             , json: []
             , emailcache: ['default']
+            , searching: ""
         };
         this.storeValues = this.storeValues.bind(this);
         this.submitToServer = this.submitToServer.bind(this);
@@ -29,6 +30,7 @@ class Body extends Component {
         this.resetJSOBNState = this.notSearchedYet.bind(this);
         this.handleExportCSVButtonClick = this.handleExportCSVButtonClick.bind(this);
         this.createCustomExportCSVButton = this.createCustomExportCSVButton.bind(this);
+        this.grayoutWhenSearching = this.grayoutWhenSearching.bind(this);
     }
 
     inputFile() {
@@ -98,8 +100,22 @@ class Body extends Component {
         return false;
     }
 
+    grayoutWhenSearching(searching) {
+        console.log('Searching: ' + searching);
+        if (searching) {
+            this.setState({
+                searching: "transparent"
+            });
+        } else {
+            this.setState({
+                searching: ""
+            });
+        }
+    }
+
     submitToServer(e) {
-        console.log('row height: %j', e.target);
+
+        this.grayoutWhenSearching(true);
         fetch('http://localhost:4000/', {
             method: 'POST',
             headers: {
@@ -141,6 +157,7 @@ class Body extends Component {
                         });
                     }
                 }
+                this.grayoutWhenSearching(false);
             }
         );
     }
@@ -162,8 +179,6 @@ class Body extends Component {
 
     render() {
 
-
-
         const not_in_screen = {
             "position": "absolute"
             , "left": "-9999px"
@@ -182,13 +197,14 @@ class Body extends Component {
                 <div className={this.state.mainClassActive}>
                     <p className={this.state.titleShow}>LogDNA Oracle</p>
                     <form className="search-bar-wrapper" onSubmit={ (e) => {
-                        e.preventDefault()
-                        if (this.state.domain !== '') {
+                        e.preventDefault();
+                       if (this.state.domain !== '') {
                             this.submitToServer(e);
                             this.slideMain();
 
                         }
-                    }}>
+                    }
+                    }>
                         <FormGroup autoComplete="off">
                             <input id="domain" autoComplete="off" action="" className="search-bar" type="text" placeholder="Company Domain" onChange={this.storeValues}/>
                             <input id="name" autoComplete="off" action="" className="search-bar" type="text" placeholder="Employee Name (Optional)" onChange={this.storeValues}/>
@@ -216,10 +232,11 @@ class Body extends Component {
                                     console.log('Returned back from server');
                                 })
                             }}> Export CSV </Button>
-                            </FormGroup>
+                        </FormGroup>
+
                     </form>
                 </div>
-                <div className={this.state.resultOnOff} >
+                <div className={this.state.resultOnOff + ' ' + this.state.searching} >
                     <BootstrapTable className="table_wrapper" data={this.state.json} striped={true} hover={true} cellEdit={ cellEditProp }>
                       <TableHeaderColumn width="40px" editable={ false } isKey={true} dataAlign="center" dataField="companyname" dataSort={true}>Company</TableHeaderColumn>
                       <TableHeaderColumn width="40px" editable={ false } dataAlign="center" dataField="firstname" dataSort={true}>First Name</TableHeaderColumn>
