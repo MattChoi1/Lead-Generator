@@ -40,7 +40,8 @@ class Body extends Component {
     uploadFile(callback) {
         var files = document.getElementById('fileInput').files;
         if (files) {
-            var file = files[0] ? files[0] : 'false';
+            var file = files[0] ? files[0] : false;
+            console.log(file);
             if (file) {
                 var reader = new FileReader();
                 reader.readAsText(file);
