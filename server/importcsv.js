@@ -31,9 +31,10 @@ var getWebsiteIndex = function(header) {
 };
 */
 
-function getWebsites() {
+exports.getWebsites = function(csvstring, callback) {
+    var string = csvstring
     csv()
-    .fromFile(csvFilePath)
+    .fromString(string || 'hello')
     .on('json', (jsonObj)=>{
         // combine csv header row and csv line to a json object
         // jsonObj.a ==> 1 or 4
@@ -68,7 +69,10 @@ function getWebsites() {
         if (error) {
            console.log('Error occured converting from csv to json: ' + error);
         }
-        start(companies);
+        start(companies, function(result) {
+            console.log('Start passes to getWebsites');
+            callback(result);
+        });
     });
 }
 /*
@@ -85,23 +89,35 @@ var createLeadsDB = function(obj, callback) {
 };
 */
 
-function start(companies) {
+function start(companies, callback) {
     async.mapSeries(companies, clearbit.search, function(err, core) { //result is now core
         if (err) {
             console.log('Error: %j', err);
             return;
         }
-        //console.log('checkpoint3: companies: ' + companies);
-        console.log('\n\ncheckpoint3 + CORE Result: %s', JSON.stringify(core, null, 4));
-        tocsv.go(core, function(error) {
-            if (error) {
-                console.log('Error occured converting from json back to csv: ' + error);
-                return;
+        var resultArray = [];
+        for (var i = 0; i < core.length; i++) {
+            var currentArray = core[i];
+            for (var j = 0; j < currentArray.length; j++) {
+                if (currentArray[j]) {
+                    currentArray[j]['companyname'] = currentArray[j].company;
+                    currentArray[j]['website'] = currentArray[j].url;
+                    resultArray.push(currentArray[j]);
+                }
             }
-            console.log('end');
-            quit();
-            return;
-        });
+        }
+        console.log(core);
+        callback(resultArray);
+        //console.log('checkpoint3: companies: ' + companies);
+        // console.log('\n\ncheckpoint3 + CORE Result: %s', JSON.stringify(core, null, 4));
+        // tocsv.go(core, function(error) {
+        //     if (error) {
+        //         console.log('Error occured converting from json back to csv: ' + error);
+        //         return;
+        //     }
+        //     console.log('end');
+        //     return;
+        // });
         /*
         async.each(core, createLeadsDB, function(err) {
             if (err) {
@@ -114,17 +130,17 @@ function start(companies) {
     });
 }
 
-function main() {
-    getWebsites();
-}
+// function main() {
+//     getWebsites();
+// }
 
-function quit() {
-    setTimeout(function() {
-        process.exit(0);
-    }, 1000);
-}
+// function quit() {
+//     setTimeout(function() {
+//         process.exit(0);
+//     }, 1000);
+// }
 
-main();
+// main();
 
 
 

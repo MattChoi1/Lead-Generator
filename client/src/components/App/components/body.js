@@ -4,6 +4,7 @@ import '../style.css';
 import {FormGroup, Button, Glyphicon} from 'react-bootstrap';
 import {BootstrapTable, TableHeaderColumn, ExportCSVButton} from 'react-bootstrap-table';
 import {CSVLink, CSVDownload} from 'react-csv';
+import axios from 'axios';
 
 class Body extends Component {
 
@@ -30,11 +31,32 @@ class Body extends Component {
         this.createCustomExportCSVButton = this.createCustomExportCSVButton.bind(this);
     }
 
+    inputFile() {
+        document.getElementById('fileInput').click();
+    }
 
+    uploadFile(callback) {
+        var files = document.getElementById('fileInput').files;
+        if (files) {
+            var file = files[0] ? files[0] : 'false';
+            if (file) {
+                var reader = new FileReader();
+                reader.readAsText(file);
+                reader.onload = () => {
+                    console.log(reader.result);
+                    axios.post('http://localhost:4000/csv', {
+                        csvString: reader.result
+                    })
+                    .then(response => {
+                        callback(response.data);
+                    })
+                }
+            }
+        }
+    }
 
     slideMain() {
         this.setState({mainClassActive: "main-active", titleShow:"title-hidden", resultOnOff:"result", backgroundActive:"background-active"});
-
     }
 
     originalMain() {
@@ -90,7 +112,7 @@ class Body extends Component {
         .then((response) => response.json())
         .then((responseJSON) =>
             {
-
+                console.log(responseJSON);
                 var numberOfPeople = responseJSON.length;
                 for (var i=0; i<numberOfPeople; i++) {
                     if (this.notSearchedYet(responseJSON[i].email)) {
@@ -167,11 +189,33 @@ class Body extends Component {
                         }
                     }}>
                         <FormGroup autoComplete="off">
-                          <input id="domain" autoComplete="off" action="" className="search-bar" type="text" placeholder="Company Domain" onChange={this.storeValues}/>
-                          <input id="name" autoComplete="off" action="" className="search-bar" type="text" placeholder="Employee Name (Optional)" onChange={this.storeValues}/>
-                          <input id="limit" autoComplete="off" action="" className="search-bar limit" type="number" placeholder="Limit" onChange={this.storeValues}/>
-                          <Button type="submit" style={not_in_screen}><Glyphicon glyph="search"></Glyphicon></Button>
-                        </FormGroup>
+                            <input id="domain" autoComplete="off" action="" className="search-bar" type="text" placeholder="Company Domain" onChange={this.storeValues}/>
+                            <input id="name" autoComplete="off" action="" className="search-bar" type="text" placeholder="Employee Name (Optional)" onChange={this.storeValues}/>
+                            <input id="limit" autoComplete="off" action="" className="search-bar limit" type="number" placeholder="Limit" onChange={this.storeValues}/>
+                            <input id="fileInput" style={{display: 'none'}} type="file" onChange={ () => {
+                                this.uploadFile(response => {
+                                    this.slideMain();
+                                    for (var i = 0; i < response.length; i++) {
+                                        var jsonObj = response[i];
+                                        this.setState({
+                                            emailcache: [...this.state.emailcache, jsonObj.email],
+                                            json: [ ...this.state.json, jsonObj]
+                                        });
+                                    }
+                                });
+                            }}/>
+                            <Button type="submit" style={not_in_screen}><Glyphicon glyph="search"></Glyphicon></Button>
+                            <Button style={{marginLeft: '20px'}} onClick={this.inputFile}> Import CSV </Button>
+                            <Button style={{marginLeft: '20px'}} onClick={() => {
+                                var jsonData = this.state.json;
+                                axios.post('http://localhost:4000/export', {
+                                    data: jsonData
+                                })
+                                .then(response => {
+                                    console.log('Returned back from server');
+                                })
+                            }}> Export CSV </Button>
+                            </FormGroup>
                     </form>
                 </div>
                 <div className={this.state.resultOnOff} >
