@@ -158,7 +158,7 @@ class Body extends Component {
             <div className={this.state.backgroundActive}>
                 <div className={this.state.mainClassActive}>
                     <p className={this.state.titleShow}>LogDNA Oracle</p>
-                    <form onSubmit={ (e) => {
+                    <form className="search-bar-wrapper" onSubmit={ (e) => {
                         e.preventDefault()
                         if (this.state.domain !== '') {
                             this.submitToServer(e);
