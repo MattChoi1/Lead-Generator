@@ -132,21 +132,20 @@ class Body extends Component {
                 var numberOfPeople = responseJSON.length;
                 for (var i=0; i<numberOfPeople; i++) {
                     if (this.notSearchedYet(responseJSON[i].email)) {
-                        console.log('not searched bro');
                         var jsonObj = {
                             priority: i
-                            , companyname: responseJSON[i].company
+                            , company: responseJSON[i].company
                             , firstname: responseJSON[i].firstname
                             , lastname: responseJSON[i].lastname
                             , title: responseJSON[i].title
                             , email: responseJSON[i].email
-                            , website: responseJSON[i].url
+                            , url: responseJSON[i].url
                             , verified: responseJSON[i].verified
                             , linkedin: responseJSON[i].linkedin || ' '
                             , twitter: responseJSON[i].twitter || ' '
                             , facebook: responseJSON[i].facebook || ' '
-                            , address: responseJSON[i].location || ' '
-                            , size: responseJSON[i].companySize
+                            , address: responseJSON[i].address || ' '
+                            , size: responseJSON[i].size
                             , status: responseJSON[i].status || ' '
                         }
                         this.setState({
@@ -237,15 +236,15 @@ class Body extends Component {
                 </div>
                 <div className={this.state.resultOnOff + ' ' + this.state.searching} >
                     <BootstrapTable className="table_wrapper" data={this.state.json} striped={true} hover={true} cellEdit={ cellEditProp }>
-                      <TableHeaderColumn width="40px" editable={ false } isKey={true} dataAlign="center" dataField="companyname" dataSort={true}>Company</TableHeaderColumn>
+                      <TableHeaderColumn width="40px" editable={ false } isKey={true} dataAlign="center" dataField="company" dataSort={true}>Company</TableHeaderColumn>
                       <TableHeaderColumn width="40px" editable={ false } dataAlign="center" dataField="firstname" dataSort={true}>First Name</TableHeaderColumn>
                       <TableHeaderColumn width="40px" editable={ false } dataAlign="center" dataField="lastname" dataSort={true} >Last Name</TableHeaderColumn>
-                      <TableHeaderColumn width="80px" editable={ false } dataAlign="center" dataField="title" dataSort={true}>Title</TableHeaderColumn>
-                      <TableHeaderColumn width="80px" editable={ false } dataAlign="center" dataField="email" >Email</TableHeaderColumn>
-                      <TableHeaderColumn width="50px" editable={ false } dataAlign="center" dataField="website" >Website</TableHeaderColumn>
+                      <TableHeaderColumn width="80px" editable={ true } dataAlign="center" dataField="title" dataSort={true}>Title</TableHeaderColumn>
+                      <TableHeaderColumn width="80px" editable={ true } dataAlign="center" dataField="email" >Email</TableHeaderColumn>
+                      <TableHeaderColumn width="50px" editable={ true } dataAlign="center" dataField="url" >Website</TableHeaderColumn>
                       <TableHeaderColumn width="30px" editable={ false } dataAlign="center" dataField="verified" >O/X</TableHeaderColumn>
-                      <TableHeaderColumn width="40px" editable={ false } dataAlign="center" dataField="linkedin" >Linkedin</TableHeaderColumn>
-                      <TableHeaderColumn width="100px"editable={ false }  dataAlign="center" dataField="address" thstyle={{overflow: 'scroll'}} >Address</TableHeaderColumn>
+                      <TableHeaderColumn width="40px" editable={ true } dataAlign="center" dataField="linkedin" >Linkedin</TableHeaderColumn>
+                      <TableHeaderColumn width="100px"editable={ true }  dataAlign="center" dataField="address" thstyle={{overflow: 'scroll'}} >Address</TableHeaderColumn>
                       <TableHeaderColumn width="30px" editable={ false } dataAlign="center" dataField="size" dataSort={true}>Size</TableHeaderColumn>
                       <TableHeaderColumn width="30px" editable={{type: 'select', options: {values: ['', 'S', 'X']}}}dataAlign="center" dataField="status" dataSort={true}>Status</TableHeaderColumn>
                     </BootstrapTable>

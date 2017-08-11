@@ -14,7 +14,7 @@ exports.create = function(original, callback) {
     var newData = [];
     for (var j = 0; j < original.result.length; j++) {
             newData.push({
-                'company': original.companyDetails.name
+                'company': original.companyDetails.company
                 , 'firstname': original.result[j].firstname
                 , 'lastname': original.result[j].lastname
                 , 'title': original.result[j].title
@@ -24,15 +24,16 @@ exports.create = function(original, callback) {
                 , 'linkedin': original.result[j].linkedin
                 , 'twitter': original.result[j].twitter
                 , 'facebook': original.result[j].facebook
-                , 'location': original.companyDetails.address
-                , 'companySize': original.companyDetails.size
+                , 'address': original.companyDetails.address
+                , 'size': original.companyDetails.size
                 , 'status': 'New to Mongo!'
             });
     }
     //console.log('NEW DATA: %j',newData);
 
     async.eachSeries(newData, function(item, cb) {
-        leads.create(item.company, item.url, item.firstname, item.lastname, item.title, item.email, item.linkedin, item.twitter, item.facebook, item.location, item.compnaySize, item.status, function(err, doc) {
+        console.log('item ' + JSON.stringify(item, null, 2));
+        leads.create(item.company, item.url, item.firstname, item.lastname, item.title, item.email, item.linkedin, item.twitter, item.facebook, item.address, item.size, item.status, function(err, doc) {
             if (err) {
                 console.log('Error in saving to mongo: %j', err);
                 cb(err);

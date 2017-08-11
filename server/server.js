@@ -28,16 +28,21 @@ app.post('/export', function(req, res) {
     }
     console.log('success');
     res.end();
-  })
-})
+  });
+});
 
 app.post('/', function (req, res) {
   var domain = req.headers.domain;
   var personName = req.headers.name;
   var limit = req.headers.limit;
-  var wrapper = [, domain, , , , personName, limit];
+
+  var payload = {}
+  payload.url = domain;
+  payload.specificPerson = personName;
+  payload.limit = limit;
+
   console.log('req.headers: ' + JSON.stringify(req.headers));
-  oracle.search(wrapper, function(err, result) {
+  oracle.search(payload, function(err, result) {
     if (err) {
         return;
     }

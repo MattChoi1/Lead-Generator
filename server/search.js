@@ -5,6 +5,7 @@ const clearbitProspect = require('clearbit')(process.env.clearbitAPI);
 const _ = require('lodash');
 const mongoo = require('./mongo.js');
 var companyDomain;
+var i = 0;
 
 var small = [ // 1-10
     {
@@ -705,10 +706,8 @@ var large = [
         , seniority: 'manager'
         , limit: 4
     }
-];//search order: Head of Infra/DevOps/SR/Platform/Systems, VP of -, Head of Eng, VP of Eng, Infra/DevOps/SR/Platform/Systems director, director of eng, - manager, - lead, lead -, senior -, general lead search, fallbacks
-//limit for fallbacks: 4
-//general lead search limit: 2
-//director of eng limit: 2
+];
+//search order: Head of Infra/DevOps/SR/Platform/Systems, VP of -, Head of Eng, VP of Eng, Infra/DevOps/SR/Platform/Systems director, director of eng, - manager, - lead, lead -, senior -, general lead search, fallbacks
 
 var small_stop = 2;
 var small_medium_stop = 3;
@@ -717,98 +716,10 @@ var medium_large_stop = 5;
 var large_stop = 6;
 var stop;
 
-/*
-var small = [
-    2 // Stop Limit
-    , {
-        domain: companyDomain
-        , role: 'engineering'
-        , seniority: 'executive'
-        , limit: 2
-        , titles: ['CTO', 'VP of Engineering', 'VP Engineering']
-    }
-    , {
-        domain: companyDomain
-        , role: 'engineering'
-        , seniority: 'manager'
-        , limit: 2
-        , titles: ['CTO', 'VP of Engineering', 'VP Engineering']
-    }
-    , {
-        domain: companyDomain
-        , role: 'ceo'
-        , seniority:'executive'
-        , limit: 1
-    }
-    , {
-        domain: companyDomain
-        , role: 'engineering'
-        , seniority: 'manager'
-        , limit: 2
-    }
-];
 
-var medium = [
-    3 // Stop Limit
-    , {
-        domain: companyDomain
-        , role: 'engineering'
-        , seniorities:['executive', 'manager']
-        , limit: 2
-        , titles: ['CTO', 'VP of Engineering', 'VP Engineering']
-    }
-    , {
-        domain: companyDomain
-        , role: 'engineering'
-        , seniority:'manager'
-        , limit: 1
-        , titles: ['Head of Engineering', 'Head']
-    }
-    , {
-        domain: companyDomain
-        , role: 'engineering'
-        , seniorities: ['manager', 'director']
-        , limit: 3
-    }
-];
-
-var large = [
-    4 // Stop Limit
-    , {
-        domain: companyDomain
-        , role: 'engineering'
-        , senioritiy: 'manager'
-        , limit: 1
-        , titles: ['Head of Engineering']
-    }
-    , {
-        domain: companyDomain
-        , role: 'engineering'
-        , seniorities: ['manager', 'director']
-        , limit: 2
-        , titles: ['Director of Engineering', 'Director of Technology', 'Engineering Manager']
-    }
-    , {
-        domain: companyDomain
-        , role: 'engineering'
-        , seniorities: ['manager', 'director']
-        , limit: 2
-        , titles: ['Lead Engineer', 'Tech Lead']
-    }
-    , {
-        domain: companyDomain
-        , role: 'engineering'
-        , seniorities: ['manager', 'director']
-        , limit: 3
-    }
-
-
-
-];*/
-
-var extraInfo = function (prospectemail, callback) { //finding linkedin and twitters
+var extraInfo = function (prospectemail, callback) { // finding linkedin and twitters
     console.log('prospectemail: ' +prospectemail);
-    clearbitEnrich.Person.find({email: prospectemail, timeout: 30000}) //using enrichment api to find extra stuff
+    clearbitEnrich.Person.find({email: prospectemail, timeout: 30000}) // using enrichment api to find extra stuff
     .then(function (person) {
         var linkedin;
         var twitter;
@@ -816,9 +727,9 @@ var extraInfo = function (prospectemail, callback) { //finding linkedin and twit
         var personalWebsite;
         var extraInfoJSON = {};
 
-        if (person.linkedin.handle) { extraInfoJSON['linkedin'] = 'linkedin.com/' + person.linkedin.handle }
-        if (person.facebook.handle) { extraInfoJSON['facebook'] = 'facebook.com/' + person.facebook.handle }
-        if (person.twitter.handle) { extraInfoJSON['twitter'] = 'twitter.com/' + person.twitter.handle }
+        if (person.linkedin.handle) { extraInfoJSON.linkedin = 'linkedin.com/' + person.linkedin.handle }
+        if (person.facebook.handle) { extraInfoJSON.facebook = 'facebook.com/' + person.facebook.handle }
+        if (person.twitter.handle) { extraInfoJSON.twitter = 'twitter.com/' + person.twitter.handle }
 
         return callback(null, extraInfoJSON);
     });
@@ -832,11 +743,11 @@ var extraInfo = function (prospectemail, callback) { //finding linkedin and twit
 
 var basicInfo = function (person) { // getting basic info about people (name, email, title, verified)
     var basicInfoJSON = {};
-    basicInfoJSON['firstname'] = person.name.givenName;
-    basicInfoJSON['lastname'] = person.name.familyName;
-    basicInfoJSON['email'] = person.email;
-    basicInfoJSON['title'] = person.title;
-    basicInfoJSON['validemail'] = person.verified;
+    basicInfoJSON.firstname = person.name.givenName;
+    basicInfoJSON.lastname = person.name.familyName;
+    basicInfoJSON.email = person.email;
+    basicInfoJSON.title = person.title;
+    basicInfoJSON.validemail = person.verified;
     return basicInfoJSON; // parsing information
 };
 
@@ -848,7 +759,7 @@ function processIndividuals(payload, person, index, callback) {
         payload.emailcache.push(person.email);
         var basicInfoJSON = basicInfo(person);
         if (payload.findextrainfo) {
-            extraInfo(basicInfoJSON['email'], function(err, extraInfoJSON) { // getting extra info (Facebook, Linkedin, Twitter)
+            extraInfo(basicInfoJSON.email, function(err, extraInfoJSON) { // getting extra info (Facebook, Linkedin, Twitter)
                 if (err) {
                     return callback(err);
                 } else {
@@ -869,7 +780,7 @@ function processIndividuals(payload, person, index, callback) {
 
 function clearBitAPI(payload, filter, callback) { // pinging prospector api
     if (payload.currentCount <= payload.stop && filter) {
-        filter['domain'] = payload.url;
+        filter.domain = payload.url;
         filter.timeout = 30000;
         clearbitProspect.Prospector.search(filter)
         .then(function(people) {
@@ -878,7 +789,8 @@ function clearBitAPI(payload, filter, callback) { // pinging prospector api
             payload.total = _.concat(payload.total, people);
             return callback(null, payload);
         })
-        .catch(function(err){
+        .catch(function(err) {
+            console.log('what is this claerbitapi error: ' + err);
             return callback(err);
         });
     } else {
@@ -890,7 +802,7 @@ function clearBitAPI(payload, filter, callback) { // pinging prospector api
 function go(filterArray, payload, callback) { // pings clearbit and then proccessing individuals once getting a batch of people
     console.log('about to be filtered!');
     async.mapSeries(filterArray, clearBitAPI.bind(clearBitAPI, payload), function(err, result) {
-        if(err){
+        if (err) {
             return callback(err);
         }
         console.log('done filtering!');
@@ -915,7 +827,7 @@ var findLeads = function(payload, callback) {
             // In case there are people with the same names, default limit to 3 people.
         }];
         payload.stop = 1; // Search once => max 3 people
-        go(custom_filter, payload, callback);
+        return go(custom_filter, payload, callback);
     }
 
     if (size === '1000+') { // Large Company
@@ -938,14 +850,14 @@ var findLeads = function(payload, callback) {
 
 
 
-exports.search = function(companies, callback) {
-    var name = companies[0];
-    var url = companies[1]; // URL
-    var size = companies[2]; // SIZE
-    var extra = companies[3]; // want LINKEDIN FACEBOOK TWITTER?
-    var location = companies[4];
-    var specificPerson = companies[5];
-    var customLimit = companies[6];
+exports.search = function(company, callback) {
+    var name = company.company;
+    var url = company.url; // URL
+    var size = company.size; // SIZE
+    var extra = company.extra; // want LINKEDIN FACEBOOK TWITTER?
+    var address = company.address;
+    var specificPerson = company.specificPerson;
+    var customLimit = company.limit;
 
     if (url) {
         var result = [];
@@ -962,7 +874,6 @@ exports.search = function(companies, callback) {
             , findextrainfo: (extra || false)
             , specificPerson: (specificPerson || null)
         };
-
         if (size) {         // If size exists in imported csv, dont call clearbit Enrich API
             // This synchronizes clearbit company size format with crunchbase company size format
             if (size === '51-100') {
@@ -979,12 +890,13 @@ exports.search = function(companies, callback) {
                 size = '11-50';
             }
 
-            payload.companyDetails['size'] = size;
-            payload.companyDetails['address'] = location;
-            payload.companyDetails['url'] = url;
-            payload.companyDetails['name'] = name;
+            payload.companyDetails.size = size;
+            payload.companyDetails.address = address;
+            payload.companyDetails.url = url;
+            payload.companyDetails.company = name;
 
             findLeads(payload, function(err, resulty) {
+                console.log('resulty: ' + JSON.stringify(resulty, null, 2));
                 mongoo.create(resulty, callback);
                 //return callback(err, resulty);
             });
@@ -992,15 +904,16 @@ exports.search = function(companies, callback) {
         } else {
             clearbitEnrich.Company.find({ domain: payload.url, timeout: 30000 }) // getting company size and other information about a company
             .then(function(company) {
-                payload.companyDetails['size'] = company.metrics.employeesRange;
-                payload.companyDetails['address'] = (company.geo.streetNumber || '') + ' ' + (company.geo.streetName || '') + ' ' + (company.geo.city || '') + ' ' + (company.geo.state || '') + ' ' + (company.geo.postalCode || '');
-                payload.companyDetails['url'] = company.domain;
-                payload.companyDetails['name'] = company.legalName || company.name;
+                payload.companyDetails.size = company.metrics.employeesRange;
+                payload.companyDetails.address = (company.geo.streetNumber || '') + ' ' + (company.geo.streetName || '') + ' ' + (company.geo.city || '') + ' ' + (company.geo.state || '') + ' ' + (company.geo.postalCode || '');
+                payload.companyDetails.url = company.domain;
+                payload.companyDetails.company = company.legalName || company.name;
                 console.log('Company Size: ' + payload.size);
                 findLeads(payload, function(err, resulty) {
+                    console.log('resulty: ' + JSON.stringify(resulty, null, 2));
                      mongoo.create(resulty, callback);
 
-                     //return callback(err, resulty);
+                     // return callback(err, resulty);
 
                 });
             });

@@ -41,4 +41,4 @@ exports.go = function(data, callback) { // exporting the parsed data into a csv
     console.log('file saved');
     return callback();
   });
-}
+};
