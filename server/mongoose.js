@@ -31,6 +31,7 @@ var createMongooseConnection = function(mongoOptions) {
     }
     var connection = mongoose.createConnection(connStr, _.defaults(mongoOptions, SERVER_OPTIONS.mongoOptions));
     connection.on('connected', function() {
+        console.log('Connection string: ' + connStr);
         console.log('Mongoose connected to DB: ' + db);
     });
     connection.on('error', function(err) {

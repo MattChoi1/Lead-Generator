@@ -6,14 +6,9 @@ class Head extends Component {
     render() {
         return (
             <div className="LogoSearch" >
-                <Navbar style={{background: "#fff"}}>
-                    <Navbar.Header >
-                      <Navbar.Brand >
-                        <a href="/">LogDNA</a>
-                      </Navbar.Brand>
-                      <Navbar.Toggle />
-                    </Navbar.Header>
-                </Navbar>
+                <div style={{background: "#333"}}>
+                    <div style={{paddingTop:"2px"}}><a href="/"><img src="https://logdna.com/assets/images/ld-logo-square-480.png" width="35px"></img></a></div>
+                </div>
             </div>
         );
     }
