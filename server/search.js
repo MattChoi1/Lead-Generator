@@ -786,7 +786,7 @@ function clearBitAPI(payload, filter, callback) { // pinging prospector api
         .then(function(people) {
             payload.currentCount += people.length; // getting the current count and adding the number of people searched through prospector
             //console.log('currentcount: ' + payload.currentCount);
-            payload.total = _.concat(payload.total, people);
+            payload.total = (payload.total).concat(people);
             return callback(null, payload);
         })
         .catch(function(err) {
@@ -800,8 +800,7 @@ function clearBitAPI(payload, filter, callback) { // pinging prospector api
 }
 
 function go(filterArray, payload, callback) { // pings clearbit and then proccessing individuals once getting a batch of people
-    console.log('about to be filtered!');
-    async.mapSeries(filterArray, clearBitAPI.bind(clearBitAPI, payload), function(err, result) {
+    async.eachSeries(filterArray, clearBitAPI.bind(clearBitAPI, payload), function(err) {
         if (err) {
             return callback(err);
         }
@@ -894,11 +893,10 @@ exports.search = function(company, callback) {
             payload.companyDetails.address = address;
             payload.companyDetails.url = url;
             payload.companyDetails.company = name;
-
             findLeads(payload, function(err, resulty) {
                 console.log('resulty: ' + JSON.stringify(resulty, null, 2));
                 mongoo.create(resulty, callback);
-                //return callback(err, resulty);
+                // return callback(err, resulty);
             });
 
         } else {
@@ -909,6 +907,7 @@ exports.search = function(company, callback) {
                 payload.companyDetails.url = company.domain;
                 payload.companyDetails.company = company.legalName || company.name;
                 console.log('Company Size: ' + payload.size);
+                console.log('Payload: ' + JSON.stringify(payload));
                 findLeads(payload, function(err, resulty) {
                     console.log('resulty: ' + JSON.stringify(resulty, null, 2));
                      mongoo.create(resulty, callback);

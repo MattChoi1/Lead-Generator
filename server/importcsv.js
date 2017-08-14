@@ -28,6 +28,7 @@ exports.getWebsites = function(csvstring, callback) {
         company.size = size;
         company.extrainfo = extrainfo;
         company.address = companylocation;
+        company.extra = true;
 
         if (url) {
             companies.push(company);
@@ -53,10 +54,14 @@ function start(companies, callback) {
             console.log('Error: %j', err);
             return;
         }
-
-        var superman = flatten(core);
-        callback(superman);
-
+        var result = {};
+        for (var i = 0 ; i < core.length; i++) {
+            var company = core[i];
+            var companyname = company[0].company;
+            result[companyname] = company;
+        }
+        console.log(result);
+        callback(result);
     });
 }
 
