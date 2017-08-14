@@ -719,7 +719,7 @@ var stop;
 
 var extraInfo = function (prospectemail, callback) { // finding linkedin and twitters
     console.log('prospectemail: ' +prospectemail);
-    clearbitEnrich.Person.find({email: prospectemail, timeout: 30000}) // using enrichment api to find extra stuff
+    clearbitEnrich.Person.find({email: prospectemail, timeout: 30000, stream: true}) // using enrichment api to find extra stuff
     .then(function (person) {
         var linkedin;
         var twitter;
@@ -782,6 +782,7 @@ function clearBitAPI(payload, filter, callback) { // pinging prospector api
     if (payload.currentCount <= payload.stop && filter) {
         filter.domain = payload.url;
         filter.timeout = 30000;
+        filter.stream = true;
         clearbitProspect.Prospector.search(filter)
         .then(function(people) {
             payload.currentCount += people.length; // getting the current count and adding the number of people searched through prospector
@@ -900,7 +901,7 @@ exports.search = function(company, callback) {
             });
 
         } else {
-            clearbitEnrich.Company.find({ domain: payload.url, timeout: 30000 }) // getting company size and other information about a company
+            clearbitEnrich.Company.find({ domain: payload.url, timeout: 30000, stream: true }) // getting company size and other information about a company
             .then(function(company) {
                 payload.companyDetails.size = company.metrics.employeesRange;
                 payload.companyDetails.address = (company.geo.streetNumber || '') + ' ' + (company.geo.streetName || '') + ' ' + (company.geo.city || '') + ' ' + (company.geo.state || '') + ' ' + (company.geo.postalCode || '');
