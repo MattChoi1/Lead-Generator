@@ -1,6 +1,6 @@
 exports.init = function(Leads) {
 
-    exports.create = function(company, url, keyURL, firstname, lastname, title, email, linkedin, twitter, facebook, location, companySize, status, callback) {
+    exports.create = function(company, url, keyURL, reason, firstname, lastname, title, email, linkedin, twitter, facebook, location, companySize, status, callback) {
         if (!email || typeof email !== 'string') {
             return callback('Error: new lead MUST have an email string');
         }
@@ -11,6 +11,7 @@ exports.init = function(Leads) {
             company: company
             , url: url
             , keyURL: keyURL || 'N/A'
+            , reason: reason || 'N/A'
             , firstname: firstname || 'N/A'
             , lastname: lastname || 'N/A'
             , title: title || 'N/A'

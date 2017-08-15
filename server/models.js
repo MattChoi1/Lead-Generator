@@ -64,7 +64,8 @@ var DBModels = (function() {
             new Schema({
               company: { type: String}
               , url: { type: String }
-              , keyURL: {type: String }
+              , keyURL: { type: String }
+              , reason: { type: String }
               , firstname: { type: String, trim: true }
               , lastname: { type: String, trim: true }
               , title: { type: String }
