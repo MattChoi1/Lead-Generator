@@ -13,6 +13,46 @@ exports.create = function(original, callback) {
     //console.log('ORIGINAL: %j', original);
     var newData = [];
     if (original) {
+        var website = original.companyDetails.url;
+        var nodotcom;
+        var withdotcom;
+        var wwwLocation = website.indexOf('www');
+        var colonLocation = website.indexOf(':');
+        var periodLocation;
+        //https + www format
+        if (wwwLocation !== -1 && wwwLocation === colonLocation + 3) {
+          //takes the location of the period before the com, net, etc
+          periodLocation = website.indexOf('.',wwwLocation + 4);
+          nodotcom = website.substring(wwwLocation + 4, periodLocation);
+          //if there is / at the end of the url
+          if(website.indexOf('/', colonLocation + 3) !== -1) {
+            withdotcom = website.substring(wwwLocation + 4, website.indexOf('/', colonLocation + 3));
+          }
+          //no / at the end of the url
+          else {
+            withdotcom = website.substring(wwwLocation + 4, website.length);
+          }
+        }
+        //https and no www
+        else if (colonLocation != -1) {
+          periodLocation = website.indexOf('.', colonLocation);
+          nodotcom = website.substring(colonLocation + 3, periodLocation);
+          if(website.indexOf('/', colonLocation + 3) !== -1) {
+            withdotcom = website.substring(colonLocation + 3, website.indexOf('/', colonLocation + 3));
+          }
+          else {
+            withdotcom = website.substring(colonLocation + 3, website.length);
+          }
+        }
+        //no https, no www
+        else {
+          withdotcom = website;
+          nodotcom = website.substring(0,website.indexOf('.'));
+        }
+        //checking for .co, changes to .com
+        if (withdotcom.substring(withdotcom.length - 2, withdotcom.length) === 'co') {
+          withdotcom = withdotcom + "m";
+        }
         for (var j = 0; j < original.result.length; j++) {
             newData.push({
                 'company': original.companyDetails.company
@@ -21,6 +61,7 @@ exports.create = function(original, callback) {
                 , 'title': original.result[j].title
                 , 'email': original.result[j].email
                 , 'url': original.companyDetails.url
+                , 'keyurl': withdotcom
                 , 'verified': original.result[j].validemail
                 , 'linkedin': original.result[j].linkedin
                 , 'twitter': original.result[j].twitter
@@ -35,7 +76,7 @@ exports.create = function(original, callback) {
 
     async.each(newData, function(item, cb) {
         console.log('item ' + JSON.stringify(item, null, 2));
-        leads.create(item.company, item.url, item.firstname, item.lastname, item.title, item.email, item.linkedin, item.twitter, item.facebook, item.address, item.size, item.status, function(err, doc) {
+        leads.create(item.company, item.url, item.keyurl, item.firstname, item.lastname, item.title, item.email, item.linkedin, item.twitter, item.facebook, item.address, item.size, item.status, function(err, doc) {
             if (err) {
                 console.log('Error in saving to mongo: %j', err);
                 cb(err);

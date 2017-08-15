@@ -1,15 +1,16 @@
 exports.init = function(Leads) {
 
-    exports.create = function(company, url, firstname, lastname, title, email, linkedin, twitter, facebook, location, companySize, status, callback) {
+    exports.create = function(company, url, keyURL, firstname, lastname, title, email, linkedin, twitter, facebook, location, companySize, status, callback) {
         if (!email || typeof email !== 'string') {
             return callback('Error: new lead MUST have an email string');
         }
-        if (!company || typeof company !== 'string') {
-            return callback('Error: new lead MUST have an company string');
-        }
+        // if (!company || typeof company !== 'string') {
+        //     return callback('Error: new lead MUST have an company string');
+        // }
         var newLead = {
             company: company
             , url: url
+            , keyURL: keyURL || 'N/A'
             , firstname: firstname || 'N/A'
             , lastname: lastname || 'N/A'
             , title: title || 'N/A'
