@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import '../style.css';
 import {FormGroup, Button, Glyphicon} from 'react-bootstrap';
+import ReactTable from 'react-table';
 import {BootstrapTable, TableHeaderColumn, ExportCSVButton} from 'react-bootstrap-table';
 import {CSVLink, CSVDownload} from 'react-csv';
 import axios from 'axios';
@@ -19,7 +20,7 @@ class Body extends Component {
             , mainClassActive: "main-not-active"
             , titleShow: "title"
             , resultOnOff: "result-hidden"
-            , json: []
+            , json: {}
             , emailcache: ['default']
             , searching: ""
         };
@@ -59,7 +60,7 @@ class Body extends Component {
     }
 
     slideMain() {
-        this.setState({mainClassActive: "main-active", titleShow:"title-hidden", resultOnOff:"result", backgroundActive:"background-active"});
+        this.setState({mainClassActive: "main-active", resultOnOff:"result"});
     }
 
     originalMain() {
@@ -176,6 +177,27 @@ class Body extends Component {
       );
     }
 
+    companyTables() {
+        var jsonData = this.state.json;
+        console.log(jsonData);
+        const columns = [
+            {Header: 'Company', accessor: 'company'}, 
+            {Header: 'Name', 
+                columns: [{Header: 'First Name', accessor: 'firstname'}, {Header: 'Last Name', accessor: 'lastname'}]},
+            {Header: 'Title', accessor: 'title'},
+            {Header: 'Email', accessor: 'email'},
+            {Header: 'Website', accessor: 'url'},
+            {Header: 'Linkedin', accessor: 'linkedin'},
+            {Header: 'Location', accessor: 'address'},
+            {Header: 'Size', accessor: 'size'},
+            {Header: 'Status', accessor: 'status'}
+        ]
+        Object.keys(jsonData).map(function(key) {
+            var data = jsonData[key];
+            return <ReactTable data={data} columns={columns}/>
+        });
+    }
+
     render() {
 
         const not_in_screen = {
@@ -190,9 +212,21 @@ class Body extends Component {
           mode: 'click'
         };
 
+        const columns = [
+            {Header: 'Company', accessor: 'company'},
+            {Header: 'First Name', accessor: 'firstname'},
+            {Header: 'Last Name', accessor: 'lastname'},
+            {Header: 'Title', accessor: 'title'},
+            {Header: 'Email', accessor: 'email'},
+            {Header: 'Website', accessor: 'url'},
+            {Header: 'Verified', accessor: 'verified'},
+            {Header: 'Location', accessor: 'address'},
+            {Header: 'Size', accessor: 'size'},
+            {Header: 'Status', accessor: 'status'}
+        ];
 
         return (
-            <div className={this.state.backgroundActive}>
+            <div>
                 <div className={this.state.mainClassActive}>
                     <p className={this.state.titleShow}>LogDNA Oracle</p>
                     <form className="search-bar-wrapper" onSubmit={ (e) => {
@@ -211,13 +245,20 @@ class Body extends Component {
                             <input id="fileInput" style={{display: 'none'}} type="file" onChange={ () => {
                                 this.uploadFile(response => {
                                     this.slideMain();
-                                    for (var i = 0; i < response.length; i++) {
-                                        var jsonObj = response[i];
-                                        this.setState({
-                                            emailcache: [...this.state.emailcache, jsonObj.email],
-                                            json: [ ...this.state.json, jsonObj]
-                                        });
+                                    for (var key in response) {
+                                        var company = response[key];
+                                        for (var i = 0; i < company.length; i++) {
+                                            var lead = company[i];
+                                            this.setState({
+                                                emailcache: [...this.state.emailcache, lead.email]
+                                            });
+                                        }
                                     }
+                                    this.setState({
+                                        json: response
+                                    });
+                                    console.log(this.state.emailcache);
+                                    console.log(this.state.json);
                                 });
                             }}/>
                             <Button type="submit" style={not_in_screen}><Glyphicon glyph="search"></Glyphicon></Button>
@@ -232,23 +273,32 @@ class Body extends Component {
                                 })
                             }}> Export CSV </Button>
                         </FormGroup>
-
                     </form>
                 </div>
-                <div className={this.state.resultOnOff + ' ' + this.state.searching} >
-                    <BootstrapTable className="table_wrapper" data={this.state.json} striped={true} hover={true} cellEdit={ cellEditProp }>
-                      <TableHeaderColumn width="40px" editable={ false } isKey={true} dataAlign="center" dataField="company" dataSort={true}>Company</TableHeaderColumn>
-                      <TableHeaderColumn width="40px" editable={ false } dataAlign="center" dataField="firstname" dataSort={true}>First Name</TableHeaderColumn>
-                      <TableHeaderColumn width="40px" editable={ false } dataAlign="center" dataField="lastname" dataSort={true} >Last Name</TableHeaderColumn>
-                      <TableHeaderColumn width="80px" editable={ true } dataAlign="center" dataField="title" dataSort={true}>Title</TableHeaderColumn>
-                      <TableHeaderColumn width="80px" editable={ true } dataAlign="center" dataField="email" >Email</TableHeaderColumn>
-                      <TableHeaderColumn width="50px" editable={ true } dataAlign="center" dataField="url" >Website</TableHeaderColumn>
-                      <TableHeaderColumn width="30px" editable={ false } dataAlign="center" dataField="verified" >O/X</TableHeaderColumn>
-                      <TableHeaderColumn width="40px" editable={ true } dataAlign="center" dataField="linkedin" >Linkedin</TableHeaderColumn>
-                      <TableHeaderColumn width="100px"editable={ true }  dataAlign="center" dataField="address" thstyle={{overflow: 'scroll'}} >Address</TableHeaderColumn>
-                      <TableHeaderColumn width="30px" editable={ false } dataAlign="center" dataField="size" dataSort={true}>Size</TableHeaderColumn>
-                      <TableHeaderColumn width="30px" editable={{type: 'select', options: {values: ['', 'S', 'X']}}}dataAlign="center" dataField="status" dataSort={true}>Status</TableHeaderColumn>
-                    </BootstrapTable>
+
+                <div className={this.state.resultOnOff + ' ' + this.state.searching}>
+                    {Object.keys(this.state.json).map(key => {
+                        var company = key; 
+                        console.log(company);
+                        var data = this.state.json[company];
+                        console.log(data);
+                        if (data) {
+                            return <div>
+                                <button className="close" onClick={() => {
+                                    this.state.json[company] = undefined;
+                                    this.setState({
+                                        json: this.state.json
+                                    });
+                                }}
+                                style={{position: 'absolute', right: '4.75%'}}>
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                <ReactTable data={data} columns={columns} defaultPageSize={data.length || 0} showPagination={false} style={{top: '12.5px', width: '90%', margin: 'auto', marginTop: '20px'}}/>
+                            </div>
+                        } else {
+                            delete this.state.json[company];
+                        }
+                    })}
                 </div>
             </div>
 

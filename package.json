@@ -6,7 +6,8 @@
   "dependencies": {
     "concurrently": "^3.5.0",
     "nodemon": "^1.11.0",
-    "react-bootstrap-table": "^4.0.0"
+    "react-bootstrap-table": "^4.0.0",
+    "react-table": "^6.5.3"
   },
   "devDependencies": {},
   "scripts": {
