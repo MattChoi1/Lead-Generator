@@ -10,20 +10,20 @@ exports.init = function(Leads) {
         var newLead = {
             company: company
             , url: url
-            , keyURL: keyURL || 'N/A'
-            , reason: reason || 'N/A'
-            , firstname: firstname || 'N/A'
-            , lastname: lastname || 'N/A'
-            , title: title || 'N/A'
+            , keyURL: keyURL
+            , reason: reason
+            , firstname: firstname
+            , lastname: lastname
+            , title: title
             , email: email
-            , location: location || 'N/A'
-            , companySize: companySize || 'N/A'
-            , linkedin: linkedin || 'N/A'
-            , twitter: twitter || 'N/A'
-            , facebook: facebook || 'N/A'
-            , status: status || 'N/A'
+            , location: location
+            , companySize: companySize
+            , linkedin: linkedin
+            , twitter: twitter
+            , facebook: facebook
+            , status: status
         };
-        Leads.update({upsert: true}, newLead, function(err, doc) {
+        Leads.update({email: email}, newLead, {upsert: true}, function(err, doc) {
             if (err) {
                 return callback('Error: Mongo could not create lead. Details:' + JSON.stringify(err));
             }

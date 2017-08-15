@@ -50,9 +50,9 @@ exports.create = function(original, callback) {
           nodotcom = website.substring(0,website.indexOf('.'));
         }
         //checking for .co, changes to .com
-        if (withdotcom.substring(withdotcom.length - 2, withdotcom.length) === 'co') {
-          withdotcom = withdotcom + "m";
-        }
+        // if (withdotcom.substring(withdotcom.length - 2, withdotcom.length) === 'co') {
+        //   withdotcom = withdotcom + "m";
+        // }
         for (var j = 0; j < original.result.length; j++) {
             newData.push({
                 'company': original.companyDetails.company
