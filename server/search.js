@@ -732,13 +732,20 @@ var extraInfo = function (prospectemail, callback) { // finding linkedin and twi
         if (person.twitter.handle) { extraInfoJSON.twitter = 'twitter.com/' + person.twitter.handle }
 
         return callback(null, extraInfoJSON);
+    })
+    .catch(function(err) {
+        var error = JSON.stringify(err);
+        if (error.indexOf('socket') != -1) {
+            console.log('calling again!');
+            extraInfo(prospectemail, callback);
+        }
+        else {
+            return callback(err);
+        }
+        // console.log('why error');
+        // console.log('Error: %j', err);
+        // return callback(err);
     });
-    // .catch(function(err) {
-    //     console.log('why error');
-    //     console.log('Error: %j', err);
-    //     return;
-    //     return callback(err);
-    // });
 };
 
 var basicInfo = function (person) { // getting basic info about people (name, email, title, verified)
@@ -790,8 +797,15 @@ function clearBitAPI(payload, filter, callback) { // pinging prospector api
             return callback(null, payload);
         })
         .catch(function(err) {
-            console.log('what is this claerbitapi error: ' + err);
-            return callback(err);
+            var error = JSON.stringify(err);
+            if (error.indexOf('socket') != -1) {
+                console.log('calling clearbitapi again!');
+                clearBitAPI(payload, filter, callback);
+            }
+            else {
+                console.log('what is this claerbitapi error: ' + err);
+                return callback(err);
+            }
         });
     } else {
         console.log('well shit');
