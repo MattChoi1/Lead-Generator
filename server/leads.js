@@ -21,7 +21,7 @@ exports.init = function(Leads) {
             , facebook: facebook || 'N/A'
             , status: status || 'N/A'
         };
-        Leads.create(newLead, function(err, doc) {
+        Leads.update({upsert: true}, newLead, function(err, doc) {
             if (err) {
                 return callback('Error: Mongo could not create lead. Details:' + JSON.stringify(err));
             }

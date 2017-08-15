@@ -295,8 +295,6 @@ class Body extends Component {
                                 </button>
                                 <ReactTable data={data} columns={columns} defaultPageSize={data.length || 0} showPagination={false} style={{top: '12.5px', width: '90%', margin: 'auto', marginTop: '20px'}}/>
                             </div>
-                        } else {
-                            delete this.state.json[company];
                         }
                     })}
                 </div>
