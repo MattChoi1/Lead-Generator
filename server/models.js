@@ -62,8 +62,9 @@ var DBModels = (function() {
     return {
         LeadsModel: new Model('Leads',
             new Schema({
-              company: { type: String, required: true }
-              , url: { type: String, required: true }
+              company: { type: String}
+              , url: { type: String }
+              , keyURL: {type: String }
               , firstname: { type: String, trim: true }
               , lastname: { type: String, trim: true }
               , title: { type: String }
@@ -77,9 +78,7 @@ var DBModels = (function() {
             })
             .plugin(createdModifiedPlugin)
           , [
-                [{ url: 1 }, { unique: true }]
-              , [{ company: 1 }, { unique: true }]
-              , [{ email: 1 }, { unique: true }]
+              [{ email: 1 }, { unique: true }]
             ]
           , LOGDNA_DB
         )
