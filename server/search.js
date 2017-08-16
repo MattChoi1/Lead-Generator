@@ -874,64 +874,75 @@ exports.search = function(company, callback) {
     var customLimit = company.limit;
 
     if (url) {
-        var result = [];
-        var emailcache = [];
-        var companyDetails = {};
-        var payload = {
-            total: []
-            , result: result
-            , currentCount: 1
-            , emailcache: emailcache
-            , companyDetails: companyDetails
-            , stop: (!(customLimit === 'null' || customLimit === 0 || customLimit==="") ? customLimit : undefined)
-            , url: url.toString()
-            , findextrainfo: (extra || false)
-            , specificPerson: (specificPerson || null)
-        };
-        if (size) {         // If size exists in imported csv, dont call clearbit Enrich API
-            // This synchronizes clearbit company size format with crunchbase company size format
-            if (size === '51-100') {
-                size = '51-250';
-            } else if (size === '101-250') {
-                size = '51-250';
-            } else if (size === '251-500') {
-                size = '251-500';
-            } else if (size === '501-1000') {
-                size = '251-1000';
-            } else if (size === '1001-5000' || size === '5001-10000' || size === '10000+') {
-                size = '1000+';
-            } else if (size === 'Nov-50') {
-                size = '11-50';
+        mongoo.getAndUpdate(url, function(err, doc){
+            if (err) {
+                return callback(err);
             }
+            else {
+                if (doc) {
+                    return callback(null, doc);
+                }
+                else {
+                    var result = [];
+                    var emailcache = [];
+                    var companyDetails = {};
+                    var payload = {
+                        total: []
+                        , result: result
+                        , currentCount: 1
+                        , emailcache: emailcache
+                        , companyDetails: companyDetails
+                        , stop: (!(customLimit === 'null' || customLimit === 0 || customLimit==="") ? customLimit : undefined)
+                        , url: url.toString()
+                        , findextrainfo: (extra || false)
+                        , specificPerson: (specificPerson || null)
+                    };
+                    if (size) {         // If size exists in imported csv, dont call clearbit Enrich API
+                    // This synchronizes clearbit company size format with crunchbase company size format
+                    if (size === '51-100') {
+                        size = '51-250';
+                    } else if (size === '101-250') {
+                        size = '51-250';
+                    } else if (size === '251-500') {
+                        size = '251-500';
+                    } else if (size === '501-1000') {
+                        size = '251-1000';
+                    } else if (size === '1001-5000' || size === '5001-10000' || size === '10000+') {
+                        size = '1000+';
+                    } else if (size === 'Nov-50') {
+                        size = '11-50';
+                    }
 
-            payload.companyDetails.size = size;
-            payload.companyDetails.address = address;
-            payload.companyDetails.url = url;
-            payload.companyDetails.company = name;
-            findLeads(payload, function(err, resulty) {
-                console.log('resulty: ' + JSON.stringify(resulty, null, 2));
-                mongoo.create(resulty, callback);
-                // return callback(err, resulty);
-            });
+                    payload.companyDetails.size = size;
+                    payload.companyDetails.address = address;
+                    payload.companyDetails.url = url;
+                    payload.companyDetails.company = name;
+                    findLeads(payload, function(err, resulty) {
+                        console.log('resulty: ' + JSON.stringify(resulty, null, 2));
+                        mongoo.create(resulty, callback);
+                        // return callback(err, resulty);
+                    });
 
-        } else {
-            clearbitEnrich.Company.find({ domain: payload.url, timeout: 30000 }) // getting company size and other information about a company
-            .then(function(company) {
-                payload.companyDetails.size = company.metrics.employeesRange;
-                payload.companyDetails.address = (company.geo.streetNumber || '') + ' ' + (company.geo.streetName || '') + ' ' + (company.geo.city || '') + ' ' + (company.geo.state || '') + ' ' + (company.geo.postalCode || '');
-                payload.companyDetails.url = company.domain;
-                payload.companyDetails.company = company.legalName || company.name;
-                console.log('Company Size: ' + payload.size);
-                console.log('Payload: ' + JSON.stringify(payload));
-                findLeads(payload, function(err, resulty) {
-                    console.log('resulty: ' + JSON.stringify(resulty, null, 2));
-                     mongoo.create(resulty, callback);
+                    } else {
+                        clearbitEnrich.Company.find({ domain: payload.url, timeout: 30000 }) // getting company size and other information about a company
+                        .then(function(company) {
+                        payload.companyDetails.size = company.metrics.employeesRange;
+                        payload.companyDetails.address = (company.geo.streetNumber || '') + ' ' + (company.geo.streetName || '') + ' ' + (company.geo.city || '') + ' ' + (company.geo.state || '') + ' ' + (company.geo.postalCode || '');
+                        payload.companyDetails.url = company.domain;
+                        payload.companyDetails.company = company.legalName || company.name;
+                        console.log('Company Size: ' + payload.size);
+                        console.log('Payload: ' + JSON.stringify(payload));
+                        findLeads(payload, function(err, resulty) {
+                            console.log('resulty: ' + JSON.stringify(resulty, null, 2));
+                            mongoo.create(resulty, callback);
 
-                     // return callback(err, resulty);
-
-                });
-            });
-        }
+                             // return callback(err, resulty);
+                            });
+                        });
+                    }
+                }
+            }
+        });
     }
 };
 

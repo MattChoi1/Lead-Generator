@@ -69,7 +69,7 @@ exports.create = function(original, callback) {
                 , 'facebook': original.result[j].facebook
                 , 'address': original.companyDetails.address
                 , 'size': original.companyDetails.size
-                , 'status': 'New to Mongo!'
+                , 'status': 'New!'
             });
         }
     }
@@ -95,6 +95,127 @@ exports.create = function(original, callback) {
         }
     });
 };
+
+exports.getAndUpdate = function(URL, callback) {
+  console.log('at getandupdate');
+  var website = URL;
+  var nodotcom;
+  var withdotcom;
+  if (website) {
+    var wwwLocation = website.indexOf('www');
+    var colonLocation = website.indexOf(':');
+    var periodLocation;
+    //https + www format
+    if (wwwLocation !== -1 && wwwLocation === colonLocation + 3) {
+      //takes the location of the period before the com, net, etc
+      periodLocation = website.indexOf('.',wwwLocation + 4);
+      nodotcom = website.substring(wwwLocation + 4, periodLocation);
+      //if there is / at the end of the url
+      if(website.indexOf('/', colonLocation + 3) !== -1) {
+        withdotcom = website.substring(wwwLocation + 4, website.indexOf('/', colonLocation + 3));
+      }
+      //no / at the end of the url
+      else {
+        withdotcom = website.substring(wwwLocation + 4, website.length);
+      }
+    }
+    //https and no www
+    else if (colonLocation != -1) {
+      periodLocation = website.indexOf('.', colonLocation);
+      nodotcom = website.substring(colonLocation + 3, periodLocation);
+      if(website.indexOf('/', colonLocation + 3) !== -1) {
+        withdotcom = website.substring(colonLocation + 3, website.indexOf('/', colonLocation + 3));
+      }
+      else {
+        withdotcom = website.substring(colonLocation + 3, website.length);
+      }
+    }
+    //no https, no www
+    else {
+      withdotcom = website;
+      nodotcom = website.substring(0,website.indexOf('.'));
+    }
+    //checking for .co, changes to .com
+    if (withdotcom.substring(withdotcom.length - 2, withdotcom.length) === 'co') {
+      withdotcom = withdotcom + "m";
+    }
+  }
+  else {
+    return callback("Can't find website");
+  }
+  console.log('checking if things are in mongo!');
+  leads.get({keyURL: withdotcom}, function(err, doc){
+    if (JSON.stringify(err) === 'Leads not found!') {
+      console.log('trying again');
+      leads.get({keyURL: nodotcom}, function(err, doc){
+        if (err) {
+          console.log('Cant find anything');
+          return callback(err);
+        }
+        else {
+          flatten(doc, nodotcom, function(err, result){
+            if (err) {
+              return callback(err);
+            }
+            else {
+              return callback(null,result);
+            }
+          });
+        }
+      });
+    }
+    else {
+      // console.log(doc);
+      flatten(doc, withdotcom, function(err, result){
+        if (err) {
+          return callback(err);
+        }
+        else {
+          return callback(null, result);
+        }
+      });
+    }
+  });
+}
+
+var flatten = function(arr, url, callback) {
+  // var compname = (Object.keys(obj))[0];
+  // var leadsArr = obj.compname;
+  // console.log(leadsArr);
+  var peopleArr = [];
+  for (var i = 0; i < arr.length; i++) {
+    if(arr[i].status === "New" || arr[i].status === "New to Mongo!") {
+      var leadsObj = {};
+      leadsObj.email = arr[i].email;
+      peopleArr.push(leadsObj);
+    }
+  }
+  if (peopleArr.length === 0) {
+    return callback(null, obj);
+  }
+  else {
+    async.each(peopleArr, function(item, cb) {
+        //console.log('item ' + JSON.stringify(item, null, 2));
+        leads.update({email: item.email}, { $set: {status: "In Oracle"}}, function(err, doc) {
+            if (err) {
+                console.log('Error in updating mongo: %j', err);
+                cb(err);
+            } else {
+                cb();
+            }
+        });
+    }, function(err) {
+        if (err) {
+          console.log('Error: %j', err);
+          return callback(err);
+        } else {
+          leads.get({keyURL: url}, function(err, doc){
+            return callback(null, doc);
+          });
+        }
+    });
+  }
+}
 
 // exports.flatten = function(list, callback) { // ordering people and formatting the raw data, takes in the raw result
 //     console.log('about to flatten!');

@@ -31,9 +31,9 @@ exports.init = function(Leads) {
         });
     };
 
-    exports.get = function(query, select, callback) {
-        Leads.findOne(query).select(select).lean().exec(function(err, doc) {
-            if (err || !doc) {
+    exports.get = function(query, callback) {
+        Leads.find(query).lean().exec(function(err, doc) {
+            if (err || !doc || doc.length === 0) {
                 return callback('Leads not found!');
             }
             return callback && callback(null, doc);
@@ -42,7 +42,7 @@ exports.init = function(Leads) {
 
     exports.update = function(query, update, callback) {
         Leads.findOneAndUpdate(query, update, function(err, doc) {
-            if (err || !doc) {
+            if (err || !doc || doc.length === 0) {
                 return callback('Leads not found!');
             }
             return callback && callback(null, doc);
