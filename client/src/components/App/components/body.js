@@ -67,6 +67,47 @@ class Body extends Component {
         this.setState({mainClassActive: "main-not-active", titleShow:"title"})
     }
 
+    createTables(callback) {
+        const columns = [
+            {Header: 'Company', accessor: 'company'},
+            {Header: 'First Name', accessor: 'firstname'},
+            {Header: 'Last Name', accessor: 'lastname'},
+            {Header: 'Title', accessor: 'title'},
+            {Header: 'Email', accessor: 'email'},
+            {Header: 'Website', accessor: 'url'},
+            {Header: 'Verified', accessor: 'verified'},
+            {Header: 'Location', accessor: 'address'},
+            {Header: 'Size', accessor: 'size'},
+            {Header: 'Status', accessor: 'status'}
+        ];
+        var companies = {};
+        Object.assign(companies, this.state.json);
+        var result = [];
+        for (var key in companies) {
+            var data = companies[key];
+            result.push(
+                <div>
+                    <button key={key + 'Button'} className="close" onClick={() => {
+                        var object = {};
+                        Object.assign(object, this.state.json);
+                        console.log(key);
+                        object[key] = undefined;
+                        this.setState({
+                            json: object
+                        }, function() {
+                            console.log(this.state.json);
+                        })
+                    }}
+                    style={{position: 'absolute', right: '4.75%'}}>
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <ReactTable key={key} data={data} columns={columns} defaultPageSize={data.length || 0} showPagination={false} style={{top: '12.5px', width: '90%', margin: 'auto', marginTop: '20px'}}/>
+                </div>
+            );
+        }
+        callback(result);
+    }
+
     reactCSVFormatter(listOfJSONObj) {
         var whole = []
         var headers = Object.keys(this.state.json[0]);
@@ -177,27 +218,6 @@ class Body extends Component {
       );
     }
 
-    companyTables() {
-        var jsonData = this.state.json;
-        console.log(jsonData);
-        const columns = [
-            {Header: 'Company', accessor: 'company'}, 
-            {Header: 'Name', 
-                columns: [{Header: 'First Name', accessor: 'firstname'}, {Header: 'Last Name', accessor: 'lastname'}]},
-            {Header: 'Title', accessor: 'title'},
-            {Header: 'Email', accessor: 'email'},
-            {Header: 'Website', accessor: 'url'},
-            {Header: 'Linkedin', accessor: 'linkedin'},
-            {Header: 'Location', accessor: 'address'},
-            {Header: 'Size', accessor: 'size'},
-            {Header: 'Status', accessor: 'status'}
-        ]
-        Object.keys(jsonData).map(function(key) {
-            var data = jsonData[key];
-            return <ReactTable data={data} columns={columns}/>
-        });
-    }
-
     render() {
 
         const not_in_screen = {
@@ -278,23 +298,26 @@ class Body extends Component {
 
                 <div className={this.state.resultOnOff + ' ' + this.state.searching}>
                     {Object.keys(this.state.json).map(key => {
-                        var company = key; 
-                        console.log(company);
-                        var data = this.state.json[company];
-                        console.log(data);
+                        var data = this.state.json[key];
                         if (data) {
-                            return <div>
-                                <button className="close" onClick={() => {
-                                    this.state.json[company] = undefined;
-                                    this.setState({
-                                        json: this.state.json
-                                    });
-                                }}
-                                style={{position: 'absolute', right: '4.75%'}}>
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                                <ReactTable data={data} columns={columns} defaultPageSize={data.length || 0} showPagination={false} style={{top: '12.5px', width: '90%', margin: 'auto', marginTop: '20px'}}/>
-                            </div>
+                            return (
+                                <div>
+                                    <button key={key + 'Button'} className="close" onClick={() => {
+                                        var object = {};
+                                        Object.assign(object, this.state.json);
+                                        delete object[key];
+                                        this.setState({
+                                            json: object
+                                        }, () => {
+                                            console.log(this.state.json);
+                                        })
+                                    }}
+                                    style={{position: 'absolute', right: '4.75%'}}>
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    <ReactTable key={key} data={data} columns={columns} defaultPageSize={data.length || 0} showPagination={false} style={{top: '12.5px', width: '90%', margin: 'auto', marginTop: '20px'}}/>
+                                </div>
+                            )
                         }
                     })}
                 </div>

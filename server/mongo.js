@@ -62,6 +62,7 @@ exports.create = function(original, callback) {
                 , 'email': original.result[j].email
                 , 'url': original.companyDetails.url
                 , 'keyurl': withdotcom
+                , 'reason': null
                 , 'verified': original.result[j].validemail
                 , 'linkedin': original.result[j].linkedin
                 , 'twitter': original.result[j].twitter
@@ -76,7 +77,7 @@ exports.create = function(original, callback) {
 
     async.each(newData, function(item, cb) {
         console.log('item ' + JSON.stringify(item, null, 2));
-        leads.create(item.company, item.url, item.keyurl, item.firstname, item.lastname, item.title, item.email, item.linkedin, item.twitter, item.facebook, item.address, item.size, item.status, function(err, doc) {
+        leads.create(item.company, item.url, item.keyurl, item.reason, item.firstname, item.lastname, item.title, item.email, item.linkedin, item.twitter, item.facebook, item.address, item.size, item.status, function(err, doc) {
             if (err) {
                 console.log('Error in saving to mongo: %j', err);
                 cb(err);
