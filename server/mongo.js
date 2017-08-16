@@ -145,7 +145,7 @@ exports.getAndUpdate = function(URL, callback) {
   }
   console.log('checking if things are in mongo!');
   leads.get({keyURL: withdotcom}, function(err, doc){
-    if (JSON.stringify(err) === 'Leads not found!') {
+    if (err) {
       console.log('trying again');
       leads.get({keyURL: nodotcom}, function(err, doc){
         if (err) {
