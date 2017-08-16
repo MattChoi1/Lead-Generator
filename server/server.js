@@ -46,8 +46,11 @@ app.post('/', function (req, res) {
     if (err) {
         return;
     }
-    console.log('result in server: %j', result);
-    return res.send(result);
+    var object = {};
+    var companyName = result[0].company;
+    object[companyName] = result;
+    console.log('result in server: %j', object);
+    return res.send(object);
   });
 });
 

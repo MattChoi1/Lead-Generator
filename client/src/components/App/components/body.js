@@ -193,8 +193,10 @@ class Body extends Component {
                         }
                         this.setState({
                             emailcache: [...this.state.emailcache, responseJSON[i].email],
-                            json: [ ...this.state.json, jsonObj],
+                            json: Object.assign(this.state.json, jsonObj),
                             value: JSON.stringify(responseJSON)
+                        }, () => {
+                            console.log(this.state.json);
                         });
                     }
                 }
