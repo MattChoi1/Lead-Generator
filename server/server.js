@@ -32,11 +32,12 @@ app.post('/export', function(req, res) {
 });
 
 app.post('/', function (req, res) {
-  var domain = req.headers.domain;
-  var personName = req.headers.name;
-  var limit = req.headers.limit;
+    console.log('req: ' + req.body.data);
+  var domain = req.body.data.domain;
+  var personName = req.body.data.name;
+  var limit = req.body.data.limit;
 
-  var payload = {}
+  var payload = {};
   payload.url = domain;
   payload.specificPerson = personName;
   payload.limit = limit;

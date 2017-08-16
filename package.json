@@ -12,7 +12,7 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "concurrently \"cd client && npm start\" \"cd server && nodemon server.js\""
+    "start": "concurrently \"cd client && npm start\" \"cd server && node server.js\""
   },
   "author": "",
   "license": "ISC"

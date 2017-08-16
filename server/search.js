@@ -716,7 +716,7 @@ var medium_large_stop = 5;
 var large_stop = 6;
 var stop;
 
-
+/*
 var extraInfo = function (prospectemail, callback) { // finding linkedin and twitters
     console.log('prospectemail: ' +prospectemail);
     clearbitEnrich.Person.find({email: prospectemail, timeout: 30000}) // using enrichment api to find extra stuff
@@ -746,7 +746,7 @@ var extraInfo = function (prospectemail, callback) { // finding linkedin and twi
         // console.log('Error: %j', err);
         // return callback(err);
     });
-};
+};*/
 
 var basicInfo = function (person) { // getting basic info about people (name, email, title, verified)
     var basicInfoJSON = {};
@@ -765,6 +765,7 @@ function processIndividuals(payload, person, index, callback) {
     if (!payload.emailcache.includes(person.email) && person.title.indexOf('Strategy') === -1 && person.title.indexOf('Consultant') === -1) {
         payload.emailcache.push(person.email);
         var basicInfoJSON = basicInfo(person);
+        /*
         if (payload.findextrainfo) {
             extraInfo(basicInfoJSON.email, function(err, extraInfoJSON) { // getting extra info (Facebook, Linkedin, Twitter)
                 if (err) {
@@ -776,10 +777,10 @@ function processIndividuals(payload, person, index, callback) {
                     return callback(null, payload);
                 }
             });
-        } else {
-            payload.result.push(basicInfoJSON); // if there's nothing, put basic info into the payload
-            return callback(null, payload);
-        }
+        } else {*/
+        payload.result.push(basicInfoJSON); // if there's nothing, put basic info into the payload
+        return callback(null, payload);
+        // }
     } else {
         return callback(null, payload);
     }

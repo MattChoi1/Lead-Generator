@@ -49,13 +49,13 @@ exports.getWebsites = function(csvstring, callback) {
 
 function start(companies, callback) {
     console.log('list of companies bro: ' + JSON.stringify(companies, null, 2));
-    async.mapSeries(companies, clearbit.search, function(err, core) { //result is now core
+    async.map(companies, clearbit.search, function(err, core) { //result is now core
         if (err) {
             console.log('Error: %j', err);
             return;
         }
         var result = {};
-        for (var i = 0 ; i < core.length; i++) {
+        for (var i = 0; i < core.length; i++) {
             var company = core[i];
             var companyname = company[0].company;
             result[companyname] = company;
@@ -65,16 +65,4 @@ function start(companies, callback) {
     });
 }
 
-function flatten(list) {
-    var result = [];
-    for (var i=0; i < list.length; i++) {
-        var currentArray = list[i];
-        for (var j = 0; j < currentArray.length; j++) {
-            if (currentArray[j]) {
-                result.push(currentArray[j]);
-            }
-        }
-    }
-    return result;
-}
 

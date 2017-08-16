@@ -135,7 +135,6 @@ class Body extends Component {
     }
 
     notSearchedYet(email) {
-        console.log('wat: ' + this.state.emailcache.indexOf(email));
         if (this.state.emailcache.indexOf(email) === -1) {
             return true;
         }
@@ -156,53 +155,29 @@ class Body extends Component {
     }
 
     submitToServer(e) {
+        var clientBody = this;
 
         this.grayoutWhenSearching(true);
-        fetch('http://localhost:4000/', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json'
-                , 'Content-Type': 'application/json'
-                , "domain": this.state.domain
-                , "name": this.state.name
-                , "limit": this.state.limit
-            }
+
+        var payload = {};
+        payload.domain = this.state.domain;
+        payload.name = this.state.name;
+        payload.limit = this.state.limit;
+
+        axios.post('http://localhost:4000/', {
+            data: payload
         })
-        .then((response) => response.json())
-        .then((responseJSON) =>
-            {
-                console.log(responseJSON);
-                var numberOfPeople = responseJSON.length;
-                for (var i=0; i<numberOfPeople; i++) {
-                    if (this.notSearchedYet(responseJSON[i].email)) {
-                        var jsonObj = {
-                            priority: i
-                            , company: responseJSON[i].company
-                            , firstname: responseJSON[i].firstname
-                            , lastname: responseJSON[i].lastname
-                            , title: responseJSON[i].title
-                            , email: responseJSON[i].email
-                            , url: responseJSON[i].url
-                            , verified: responseJSON[i].verified
-                            , linkedin: responseJSON[i].linkedin || ' '
-                            , twitter: responseJSON[i].twitter || ' '
-                            , facebook: responseJSON[i].facebook || ' '
-                            , address: responseJSON[i].address || ' '
-                            , size: responseJSON[i].size
-                            , status: responseJSON[i].status || ' '
-                        }
-                        this.setState({
-                            emailcache: [...this.state.emailcache, responseJSON[i].email],
-                            json: Object.assign(this.state.json, jsonObj),
-                            value: JSON.stringify(responseJSON)
-                        }, () => {
-                            console.log(this.state.json);
-                        });
-                    }
-                }
-                this.grayoutWhenSearching(false);
-            }
-        );
+        .then(response => {
+            console.log('response: %j', response.data);
+            this.setState({
+                json: Object.assign(this.state.json, response.data)
+            })
+            this.grayoutWhenSearching(false);
+        })
+        .catch(error => {
+            console.log('Error occured while getting reponse back from the server: ' + error);
+        })
+
     }
 
     handleExportCSVButtonClick = (onClick) => {
