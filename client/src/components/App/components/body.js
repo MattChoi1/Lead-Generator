@@ -168,10 +168,26 @@ class Body extends Component {
             data: payload
         })
         .then(response => {
-            console.log('response: %j', response.data);
+
+            var key = Object.keys(response.data);
+            for(var i=0; i<response.data[key].length; i++) {
+                var leadEmail = response.data[key][i].email;
+                if(this.notSearchedYet(leadEmail)){
+                    this.setState({
+                        emailcache: [...this.state.emailcache, leadEmail]
+                    })
+                }
+            }
+            delete this.state.json[key[0]]
+            var anotherOne = this.state.json
             this.setState({
-                json: Object.assign(this.state.json, response.data)
+                json: anotherOne
             })
+            var anotherOne = Object.assign(this.state.json, response.data);
+            this.setState({
+                json: anotherOne
+            })
+            console.log('json: %j', this.state.json);
             this.grayoutWhenSearching(false);
         })
         .catch(error => {
