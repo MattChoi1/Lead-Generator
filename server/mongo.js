@@ -184,7 +184,7 @@ var flatten = function(arr, url, callback) {
   // console.log(leadsArr);
   var peopleArr = [];
   for (var i = 0; i < arr.length; i++) {
-    if(arr[i].status === "New" || arr[i].status === "New to Mongo!") {
+    if(arr[i].status === "New!" || arr[i].status === "New to Mongo!") {
       var leadsObj = {};
       leadsObj.email = arr[i].email;
       peopleArr.push(leadsObj);
