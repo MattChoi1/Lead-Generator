@@ -15,22 +15,23 @@ class Body extends Component {
             domain: ''
             , name: ''
             , limit: ''
-            , value: ''
             , backgroundActive: "background"
-            , mainClassActive: "main-not-active"
+            , main: "main"
             , titleShow: "title"
-            , resultOnOff: "result-hidden"
+            , table: "result-hidden"
             , json: {}
             , emailcache: ['default']
+            , searchbar: "searchbar-wrapper"
             , searching: ""
+            , fixed: ""
+            , smallLogo: "smallLogo"
+            , hide: "hide"
         };
         this.storeValues = this.storeValues.bind(this);
         this.submitToServer = this.submitToServer.bind(this);
         this.slideMain = this.slideMain.bind(this);
         this.originalMain = this.originalMain.bind(this);
         this.resetJSOBNState = this.notSearchedYet.bind(this);
-        this.handleExportCSVButtonClick = this.handleExportCSVButtonClick.bind(this);
-        this.createCustomExportCSVButton = this.createCustomExportCSVButton.bind(this);
         this.grayoutWhenSearching = this.grayoutWhenSearching.bind(this);
     }
 
@@ -60,11 +61,11 @@ class Body extends Component {
     }
 
     slideMain() {
-        this.setState({mainClassActive: "main-active", resultOnOff:"result"});
+        this.setState({main: "main-active", table:"result", titleShow:"title-hidden", fixed:"fixed", hide:""});
     }
 
     originalMain() {
-        this.setState({mainClassActive: "main-not-active", titleShow:"title"})
+        this.setState({main: "main", titleShow:"title"})
     }
 
     createTables(callback) {
@@ -98,7 +99,7 @@ class Body extends Component {
                             console.log(this.state.json);
                         })
                     }}
-                    style={{position: 'absolute', right: '4.75%'}}>
+                    style={{position: 'absolute', right: '2.5%'}}>
                         <span aria-hidden="true">&times;</span>
                     </button>
                     <ReactTable key={key} data={data} columns={columns} defaultPageSize={data.length || 0} showPagination={false} style={{top: '12.5px', width: '90%', margin: 'auto', marginTop: '20px'}}/>
@@ -196,31 +197,9 @@ class Body extends Component {
 
     }
 
-    handleExportCSVButtonClick = (onClick) => {
-          // Custom your onClick event here,
-          // it's not necessary to implement this function if you have no any process before onClick
-          console.log('This is my custom function for ExportCSVButton click event');
-          onClick();
-    }
 
-    createCustomExportCSVButton = (onClick) => {
-      return (
-        <ExportCSVButton className="exportbutton"
-          btnText='CSV'
-          onClick={ () => this.handleExportCSVButtonClick(onClick) }/>
-      );
-    }
 
     render() {
-
-        const not_in_screen = {
-            "position": "absolute"
-            , "left": "-9999px"
-        }
-
-        const long_data = {
-            "priority": "12321321"
-        }
         const cellEditProp = {
           mode: 'click'
         };
@@ -240,9 +219,9 @@ class Body extends Component {
 
         return (
             <div>
-                <div className={this.state.mainClassActive}>
+                <div className={this.state.main}>
                     <p className={this.state.titleShow}>LogDNA Oracle</p>
-                    <form className="search-bar-wrapper" onSubmit={ (e) => {
+                    <form className={this.state.searchbar + ' ' + this.state.fixed} onSubmit={ (e) => {
                         e.preventDefault();
                        if (this.state.domain !== '') {
                             this.submitToServer(e);
@@ -252,6 +231,7 @@ class Body extends Component {
                     }
                     }>
                         <FormGroup autoComplete="off">
+                            <a className={this.state.smallLogo + ' ' + this.state.hide} href="/"><img src="https://logdna.com/assets/images/ld-logo-square-480.png" width="35px"></img></a>
                             <input id="domain" autoComplete="off" action="" className="search-bar" type="text" placeholder="Company Domain" onChange={this.storeValues}/>
                             <input id="name" autoComplete="off" action="" className="search-bar" type="text" placeholder="Employee Name (Optional)" onChange={this.storeValues}/>
                             <input id="limit" autoComplete="off" action="" className="search-bar limit" type="number" placeholder="Limit" onChange={this.storeValues}/>
@@ -268,13 +248,13 @@ class Body extends Component {
                                         }
                                     }
                                     this.setState({
-                                        json: response
+                                        json: Object.assign(this.state.json, response)
                                     });
                                     console.log(this.state.emailcache);
                                     console.log(this.state.json);
                                 });
                             }}/>
-                            <Button type="submit" style={not_in_screen}><Glyphicon glyph="search"></Glyphicon></Button>
+                            <Button type="submit" style={{"position": "absolute", "left": "-9999px"}}><Glyphicon glyph="search"></Glyphicon></Button>
                             <Button style={{marginLeft: '20px'}} onClick={this.inputFile}> Import CSV </Button>
                             <Button style={{marginLeft: '20px'}} onClick={() => {
                                 var jsonData = this.state.json;
@@ -289,7 +269,7 @@ class Body extends Component {
                     </form>
                 </div>
 
-                <div className={this.state.resultOnOff + ' ' + this.state.searching}>
+                <div className={this.state.table + ' ' + this.state.searching}>
                     {Object.keys(this.state.json).map(key => {
                         var data = this.state.json[key];
                         if (data) {
@@ -308,7 +288,7 @@ class Body extends Component {
                                     style={{position: 'absolute', right: '4.75%'}}>
                                         <span aria-hidden="true">&times;</span>
                                     </button>
-                                    <ReactTable key={key} data={data} columns={columns} defaultPageSize={data.length || 0} showPagination={false} style={{top: '12.5px', width: '90%', margin: 'auto', marginTop: '20px'}}/>
+                                    <ReactTable key={key} data={data} columns={columns} defaultPageSize={data.length || 0} showPagination={false} style={{top: '12.5px', width: '90%', margin: 'auto', marginTop: '20px', marginBottom: '20px'}}/>
                                 </div>
                             )
                         }

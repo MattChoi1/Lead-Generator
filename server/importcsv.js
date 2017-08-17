@@ -57,9 +57,12 @@ function start(companies, callback) {
         var result = {};
         for (var i = 0; i < core.length; i++) {
             var company = core[i];
-            var companyname = company[0].company;
-            result[companyname] = company;
+            if (company[0]) {
+                var companyname = company[0].company;
+                result[companyname] = company;
+            }
         }
+
         console.log(result);
         callback(result);
     });
