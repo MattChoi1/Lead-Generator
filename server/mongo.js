@@ -191,7 +191,7 @@ var flatten = function(arr, url, callback) {
     }
   }
   if (peopleArr.length === 0) {
-    return callback(null, obj);
+    return callback(null, arr);
   }
   else {
     async.each(peopleArr, function(item, cb) {
