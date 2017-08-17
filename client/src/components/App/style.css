@@ -41,7 +41,7 @@
     border-top: 1px solid #333;
     border-bottom: 1px solid #333;
     padding: 10px 15px;
-    transition: width 0.2s linear;
+    transition: width 0.1s linear;
     text-align: center;
     color:black;
     appearance:none;
@@ -81,13 +81,13 @@
 
 .main-active {
     margin-top: 0px;
-    transition: margin 0.3s ease-in;
+    transition: margin 0.1s ease-in;
 }
 
 .result-hidden {
     display:none;
     opacity: 0;
-    transition: all 10s linear;
+    transition: all 0.1s linear;
     overflow: scroll;
 }
 
@@ -98,7 +98,7 @@
     margin-top: -10px !important;
     width: 100%;
     margin: auto;
-    transition: top 2s linear;
+    transition: top 0.1s linear;
 }
 
 
@@ -121,7 +121,7 @@
     background: white !important;
     z-index: 2;
     position: fixed;
-    transition: all 0.3s ease-in;
+    transition: all 0.1s ease-in;
 }
 
 .fixed {

@@ -3,9 +3,9 @@ import React, { Component } from 'react';
 import '../style.css';
 import {FormGroup, Button, Glyphicon} from 'react-bootstrap';
 import ReactTable from 'react-table';
-import {BootstrapTable, TableHeaderColumn, ExportCSVButton} from 'react-bootstrap-table';
 import {CSVLink, CSVDownload} from 'react-csv';
 import axios from 'axios';
+import Table from './table.js';
 
 class Body extends Component {
 
@@ -33,6 +33,7 @@ class Body extends Component {
         this.originalMain = this.originalMain.bind(this);
         this.resetJSOBNState = this.notSearchedYet.bind(this);
         this.grayoutWhenSearching = this.grayoutWhenSearching.bind(this);
+        this.tableHandler = this.tableHandler.bind(this);
     }
 
     inputFile() {
@@ -61,11 +62,11 @@ class Body extends Component {
     }
 
     slideMain() {
-        this.setState({main: "main-active", table:"result", titleShow:"title-hidden", fixed:"fixed", hide:""});
+        this.setState({main: "main-active", table:"result", titleShow:"title-hidden",  fixed:"fixed", hide:""});
     }
 
     originalMain() {
-        this.setState({main: "main", titleShow:"title"})
+        this.setState({main: "main", titleShow:"title", hide:"hide", fixed:""})
     }
 
     createTables(callback) {
@@ -164,12 +165,10 @@ class Body extends Component {
         payload.domain = this.state.domain;
         payload.name = this.state.name;
         payload.limit = this.state.limit;
-
         axios.post('http://localhost:4000/', {
             data: payload
         })
         .then(response => {
-
             var key = Object.keys(response.data);
             for(var i=0; i<response.data[key].length; i++) {
                 var leadEmail = response.data[key][i].email;
@@ -197,25 +196,23 @@ class Body extends Component {
 
     }
 
+    tableHandler(key) {
+        var object = {};
+        object = Object.assign(object, this.state.json);
+        delete object[key];
+        this.setState({
+            json: object
+        });
+        if (Object.keys(object).length <= 0) {
+            this.originalMain();
+        }
+    }
 
 
     render() {
         const cellEditProp = {
           mode: 'click'
         };
-
-        const columns = [
-            {Header: 'Company', accessor: 'company'},
-            {Header: 'First Name', accessor: 'firstname'},
-            {Header: 'Last Name', accessor: 'lastname'},
-            {Header: 'Title', accessor: 'title'},
-            {Header: 'Email', accessor: 'email'},
-            {Header: 'Website', accessor: 'url'},
-            {Header: 'Verified', accessor: 'verified'},
-            {Header: 'Location', accessor: 'address'},
-            {Header: 'Size', accessor: 'size'},
-            {Header: 'Status', accessor: 'status'}
-        ];
 
         return (
             <div>
@@ -274,22 +271,7 @@ class Body extends Component {
                         var data = this.state.json[key];
                         if (data) {
                             return (
-                                <div>
-                                    <button key={key + 'Button'} className="close" onClick={() => {
-                                        var object = {};
-                                        Object.assign(object, this.state.json);
-                                        delete object[key];
-                                        this.setState({
-                                            json: object
-                                        }, () => {
-                                            console.log(this.state.json);
-                                        })
-                                    }}
-                                    style={{position: 'absolute', right: '4.75%'}}>
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                    <ReactTable key={key} data={data} columns={columns} defaultPageSize={data.length || 0} showPagination={false} style={{top: '12.5px', width: '90%', margin: 'auto', marginTop: '20px', marginBottom: '20px'}}/>
-                                </div>
+                                <Table data={data} keyValue={key} tableHandler={this.tableHandler}/>
                             )
                         }
                     })}
