@@ -58,8 +58,8 @@ function start(companies, callback) {
         for (var i = 0; i < core.length; i++) {
             var company = core[i];
             if (company[0]) {
-                var companyname = company[0].company;
-                result[companyname] = company;
+                var companyKey = company[0].keyURL || company[0].keyurl;
+                result[companyKey] = company;
             }
         }
 

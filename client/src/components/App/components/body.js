@@ -69,47 +69,6 @@ class Body extends Component {
         this.setState({main: "main", titleShow:"title", hide:"hide", fixed:""})
     }
 
-    createTables(callback) {
-        const columns = [
-            {Header: 'Company', accessor: 'company'},
-            {Header: 'First Name', accessor: 'firstname'},
-            {Header: 'Last Name', accessor: 'lastname'},
-            {Header: 'Title', accessor: 'title'},
-            {Header: 'Email', accessor: 'email'},
-            {Header: 'Website', accessor: 'url'},
-            {Header: 'Verified', accessor: 'verified'},
-            {Header: 'Location', accessor: 'address'},
-            {Header: 'Size', accessor: 'size'},
-            {Header: 'Status', accessor: 'status'}
-        ];
-        var companies = {};
-        Object.assign(companies, this.state.json);
-        var result = [];
-        for (var key in companies) {
-            var data = companies[key];
-            result.push(
-                <div>
-                    <button key={key + 'Button'} className="close" onClick={() => {
-                        var object = {};
-                        Object.assign(object, this.state.json);
-                        console.log(key);
-                        object[key] = undefined;
-                        this.setState({
-                            json: object
-                        }, function() {
-                            console.log(this.state.json);
-                        })
-                    }}
-                    style={{position: 'absolute', right: '2.5%'}}>
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    <ReactTable key={key} data={data} columns={columns} defaultPageSize={data.length || 0} showPagination={false} style={{top: '12.5px', width: '90%', margin: 'auto', marginTop: '20px'}}/>
-                </div>
-            );
-        }
-        callback(result);
-    }
-
     reactCSVFormatter(listOfJSONObj) {
         var whole = []
         var headers = Object.keys(this.state.json[0]);
@@ -192,6 +151,7 @@ class Body extends Component {
         })
         .catch(error => {
             console.log('Error occured while getting reponse back from the server: ' + error);
+            this.grayoutWhenSearching(false);
         })
 
     }

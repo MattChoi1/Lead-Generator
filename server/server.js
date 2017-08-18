@@ -3,6 +3,7 @@ var cors = require('cors');
 var bodyParser = require('body-parser');
 var csv = require('./importcsv');
 var exportCsv = require('./exportcsv');
+var leads = require('./leads');
 
 var app = express();
 var oracle = require('./search.js');
@@ -31,6 +32,16 @@ app.post('/export', function(req, res) {
   });
 });
 
+app.post('/lead', function(req, res) {
+  var object = req.body.data;
+  console.log(object);
+  leads.create(object.company, object.url, object.keyURL, object.reason, object.firstname, object.lastname, object.title, 
+    object.email, object.linkined, object.twitter, object.facebook, object.location, object.companySize, object.status, function() {
+    console.log('Item updated');
+    res.end();
+  });
+})
+
 app.post('/', function (req, res) {
     console.log('req: ' + req.body.data);
   var domain = req.body.data.domain;
@@ -48,10 +59,13 @@ app.post('/', function (req, res) {
         return;
     }
     var object = {};
-    var companyName = result[0].company;
-    object[companyName] = result;
-    console.log('result in server: %j', object);
-    return res.send(object);
+    if (result.length) {
+      var companyName = result[0].keyurl || result[0].keyURL;
+      object[companyName] = result;
+      console.log('result in server: %j', object);
+      return res.send(object);
+    }
+    res.end();
   });
 });
 
