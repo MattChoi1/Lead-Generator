@@ -157,15 +157,18 @@ class Body extends Component {
     }
 
     tableHandler(key) {
-        var object = {};
-        object = Object.assign(object, this.state.json);
-        delete object[key];
+        console.log(key);
+        this.state.json[key] = undefined;
         this.setState({
-            json: object
-        });
-        if (Object.keys(object).length <= 0) {
+            json: this.state.json
+        }, function() {
+            console.log(this.state.json);
+            delete this.state.json[key];
+            console.log(this.state.json);
+            if (Object.keys(this.state.json).length <= 0) {
             this.originalMain();
         }
+        });
     }
 
 
@@ -183,7 +186,6 @@ class Body extends Component {
                        if (this.state.domain !== '') {
                             this.submitToServer(e);
                             this.slideMain();
-
                         }
                     }
                     }>

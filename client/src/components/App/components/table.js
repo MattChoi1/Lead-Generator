@@ -15,11 +15,8 @@ class Table extends Component {
             keyURL: null,
         };
         this.expand = this.expand.bind(this);
-<<<<<<< HEAD
         this.renderEditable = this.renderEditable.bind(this);
-=======
         this.inPropellerIntercom = this.inPropellerIntercom.bind(this);
->>>>>>> bc8a89106effa159dbaaa9f128ffce92361b8e56
     }
 
     componentWillMount(){
@@ -58,7 +55,7 @@ class Table extends Component {
                 contentEditable
                 suppressContentEditableWarning
                 onBlur={e => {
-                    var data = [...this.state.data];
+                    var data = [...this.state.alldata];
                     data[cellInfo.index][cellInfo.column.id] = e.target.innerHTML;
                     this.setState({data}, function() {
                         console.log(data[cellInfo.index]);
@@ -74,7 +71,7 @@ class Table extends Component {
                     });
                 }}
                 dangerouslySetInnerHTML={{
-                   __html: this.state.data[cellInfo.index][cellInfo.column.id]
+                   __html: this.state.alldata[cellInfo.index][cellInfo.column.id]
                 }}
             />
        )
@@ -106,6 +103,7 @@ class Table extends Component {
             <div>
                 <button key={buttonKey} className="close" onClick={() => {
                     var object = {};
+                    console.log(tableKey);
                     this.props.tableHandler(tableKey);
                 }}
                 style={{position: 'absolute', right: '4.25%'}}>
