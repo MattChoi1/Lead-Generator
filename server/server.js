@@ -4,6 +4,7 @@ var bodyParser = require('body-parser');
 var csv = require('./importcsv');
 var exportCsv = require('./exportcsv');
 var leads = require('./leads');
+var fs = require('fs');
 
 var app = express();
 var oracle = require('./search.js');
@@ -23,12 +24,16 @@ app.post('/csv', function (req, res) {
 app.post('/export', function(req, res) {
   var jsonData = req.body.data;
   console.log(jsonData);
-  exportCsv.go(jsonData, function(error) {
-    if (error) {
-      callback(error);
-    }
-    console.log('success');
-    res.end();
+  exportCsv.go(jsonData, function(csv) {
+    fs.writeFile('result.csv', csv, function(err) {
+      if (err) {
+          console.log(err);
+          res.send(err);
+      }
+      console.log('file saved');
+      var file = __dirname + '/result.csv';
+      res.download(file);
+    });
   });
 });
 

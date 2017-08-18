@@ -40,6 +40,10 @@ class Body extends Component {
         document.getElementById('fileInput').click();
     }
 
+    downloadCSV() {
+        document.getElementById('csv').click();
+    }
+
     uploadFile(callback) {
         var files = document.getElementById('fileInput').files;
         if (files) {
@@ -213,6 +217,7 @@ class Body extends Component {
                                     console.log(this.state.json);
                                 });
                             }}/>
+                            <a id="csv" href="../../../../../server/result.csv" style={{display: 'none'}}>CSV</a>
                             <Button type="submit" style={{"position": "absolute", "left": "-9999px"}}><Glyphicon glyph="search"></Glyphicon></Button>
                             <Button style={{marginLeft: '20px'}} onClick={this.inputFile}> Import CSV </Button>
                             <Button style={{marginLeft: '20px'}} onClick={() => {
@@ -221,7 +226,8 @@ class Body extends Component {
                                     data: jsonData
                                 })
                                 .then(response => {
-                                    console.log('Returned back from server');
+                                    console.log(response);
+                                    this.downloadCSV();
                                 })
                             }}> Export CSV </Button>
                         </FormGroup>
