@@ -57,7 +57,7 @@ class Body extends Component {
                 reader.readAsText(file);
                 reader.onload = () => {
                     console.log(reader.result);
-                    axios.post('http://localhost:4000/csv', {
+                    axios.post('/csv', {
                         csvString: reader.result
                     })
                     .then(response => {
@@ -149,7 +149,7 @@ class Body extends Component {
         payload.domain = this.state.domain;
         payload.name = this.state.name;
         payload.limit = this.state.limit;
-        axios.post('http://localhost:4000/', {
+        axios.post('/', {
             data: payload
         })
         .then(response => {
@@ -279,7 +279,7 @@ class Body extends Component {
                             <Button style={{marginLeft: '20px'}} onClick={this.inputFile}> Import CSV </Button>
                             <Button style={{marginLeft: '20px'}} onClick={() => {
                                 var jsonData = this.state.data;
-                                axios.post('http://localhost:4000/export', {
+                                axios.post('/export', {
                                     data: jsonData
                                 })
                                 .then(response => {

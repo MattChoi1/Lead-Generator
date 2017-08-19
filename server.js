@@ -5,6 +5,16 @@ var csv = require('./importcsv');
 var exportCsv = require('./exportcsv');
 var leads = require('./leads');
 var fs = require('fs');
+const http = require('http');
+const https = require('https');
+const secret = require('../absecret');
+
+function proxyToSecure(req, res) {
+  res.writeHead(301, {
+    'Location': 'https://' + req.headers.host + req.url
+  });
+  res.end();
+}
 
 var app = express();
 var oracle = require('./search.js');
@@ -85,4 +95,10 @@ app.post('/', function (req, res) {
   });
 });
 
-app.listen(4000);
+var httpsServer = https.createServer(secret.ldcredentials, app).listen(443, function() {
+  console.log('https server running on port 443');
+})
+
+var server = http.createServer(proxyToSecure).listen(80, function() {
+  console.log('http server running on port 80');
+});

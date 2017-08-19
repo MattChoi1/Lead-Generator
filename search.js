@@ -1,7 +1,8 @@
+require('../absecret');
 const async = require('async');
 
-const clearbitEnrich = require('clearbit')(process.env.clearbitAPI);
-const clearbitProspect = require('clearbit')(process.env.clearbitAPI);
+const clearbitEnrich = require('clearbit')(__keys.clearbitAPI);
+const clearbitProspect = require('clearbit')(__keys.clearbitAPI);
 const _ = require('lodash');
 const mongoo = require('./mongo.js');
 var companyDomain;
