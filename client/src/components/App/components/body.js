@@ -274,7 +274,7 @@ class Body extends Component {
                                     });
                                 }}
                             />
-                            <a id="csv" href="../../../../../server/result.csv" style={{display: 'none'}}>CSV</a>
+                            <a id="csv" href="/download" style={{display: 'none'}}>CSV</a>
                             <Button type="submit" style={{"position": "absolute", "left": "-9999px"}}><Glyphicon glyph="search"></Glyphicon></Button>
                             <Button style={{marginLeft: '20px'}} onClick={this.inputFile}> Import CSV </Button>
                             <Button style={{marginLeft: '20px'}} onClick={() => {
@@ -283,7 +283,7 @@ class Body extends Component {
                                     data: jsonData
                                 })
                                 .then(response => {
-                                    console.log(response);
+                                    document.getElementById('csv').click();
                                 })
                             }}> Export CSV </Button>
                         </FormGroup>

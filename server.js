@@ -13,6 +13,12 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(__dirname + '/client/build'));
 
+app.get('/download', function(req, res) {
+  console.log('Download path working');
+  var file = __dirname + '/result.csv';
+  res.download(file);
+})
+
 app.get('*', function(req, res) {
   res.sendFile(__dirname + '/client/build/index.html');
 })
