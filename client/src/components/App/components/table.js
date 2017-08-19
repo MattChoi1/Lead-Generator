@@ -96,8 +96,9 @@ class Table extends Component {
             {Header: 'Size', accessor: 'size'},
             {Header: 'Status', accessor: 'status'}
         ];
-        const tableKey = this.props.keyValue;
+        const tableKey = this.props.index;
         const buttonKey = this.props.keyValue + 'button';
+        console.log(this.props);
         return (
 
             <div>

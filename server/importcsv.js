@@ -54,17 +54,15 @@ function start(companies, callback) {
             console.log('Error: %j', err);
             return;
         }
-        var result = {};
+        var unique = [];
         for (var i = 0; i < core.length; i++) {
             var company = core[i];
-            if (company[0]) {
-                var companyKey = company[0].keyURL || company[0].keyurl;
-                result[companyKey] = company;
+            if (!unique.includes(company)) {
+                unique.push(company);
             }
         }
-
-        console.log(result);
-        callback(result);
+        console.log(unique);
+        callback(unique);
     });
 }
 

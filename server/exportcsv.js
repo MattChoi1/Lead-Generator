@@ -5,8 +5,8 @@ exports.go = function(data, callback) { // exporting the parsed data into a csv
   var newData = [];
   var next;
   //console.log('Final Data: %j', data);
-  for (var key in data) {
-    var company = data[key];
+  for (var j = 0; j < data.length; j++) {
+    var company = data[j];
     for (var i = 0; i < company.length; i++) {  
       next = company[i];
       console.log(next);

@@ -20,6 +20,9 @@ class Body extends Component {
             , titleShow: "title"
             , table: "result-hidden"
             , json: {}
+            , data: []
+            , tables: []
+            , keys: []
             , emailcache: ['default']
             , searchbar: "searchbar-wrapper"
             , searching: ""
@@ -71,6 +74,24 @@ class Body extends Component {
 
     originalMain() {
         this.setState({main: "main", titleShow:"title", hide:"hide", fixed:""})
+    }
+
+    createTables() {
+        var newTables = [];
+        for (var i = this.state.data.length - 1; i >= 0; i--) {
+            var data = this.state.data[i];
+            var index = i;
+            var key = data[0].keyURL || data[0].keyurl;
+            if (this.state.keys.indexOf(key) === -1) {
+                this.state.keys.push(key);
+            }
+            newTables.push(<Table data={data} key={key} index={index} tableHandler={this.tableHandler}/>);
+        }
+        this.setState({
+            tables: newTables
+        }, function() {
+            console.log(this.state.tables);
+        });
     }
 
     reactCSVFormatter(listOfJSONObj) {
@@ -132,25 +153,37 @@ class Body extends Component {
             data: payload
         })
         .then(response => {
-            var key = Object.keys(response.data);
-            for(var i=0; i<response.data[key].length; i++) {
-                var leadEmail = response.data[key][i].email;
+            console.log(response.data);
+            for(var i=0; i<response.data.length; i++) {
+                var leadEmail = response.data[i].email;
                 if(this.notSearchedYet(leadEmail)){
                     this.setState({
                         emailcache: [...this.state.emailcache, leadEmail]
                     })
                 }
             }
-            delete this.state.json[key[0]]
-            var anotherOne = this.state.json
+            // delete this.state.json[key[0]]
+            // var anotherOne = this.state.json
+            // this.setState({
+            //     json: anotherOne
+            // })
+            // var anotherOne = Object.assign(this.state.json, response.data);
+            // this.setState({
+            //     json: anotherOne
+            // })
+            // console.log('json: %j', this.state.json);
+            if (response.data.length) {
+                var companyKey = response.data[0].keyURL || response.data[0].keyurl;
+                if (!this.state.keys.includes(companyKey)) {
+                    this.state.data.push(response.data);
+                }
+            } 
             this.setState({
-                json: anotherOne
-            })
-            var anotherOne = Object.assign(this.state.json, response.data);
-            this.setState({
-                json: anotherOne
-            })
-            console.log('json: %j', this.state.json);
+                data: this.state.data
+            }, () => {
+                console.log(this.state.data);
+                this.createTables();
+            });
             this.grayoutWhenSearching(false);
         })
         .catch(error => {
@@ -160,18 +193,20 @@ class Body extends Component {
 
     }
 
-    tableHandler(key) {
-        console.log(key);
-        this.state.json[key] = undefined;
+    tableHandler(index) {
+        console.log(index);
+        var companyKey = this.state.data[index][0].keyURL || this.state.data[index][0].keyurl;
+        var indexOfKey = this.state.keys.indexOf(companyKey);
+        this.state.keys.splice(indexOfKey, 1);
+        this.state.data.splice(index, 1);
         this.setState({
-            json: this.state.json
+            data: this.state.data
         }, function() {
-            console.log(this.state.json);
-            delete this.state.json[key];
-            console.log(this.state.json);
-            if (Object.keys(this.state.json).length <= 0) {
-            this.originalMain();
-        }
+            console.log(this.state.data);
+            this.createTables();
+            if (this.state.data.length <= 0) {
+                this.originalMain();
+            }
         });
     }
 
@@ -184,7 +219,7 @@ class Body extends Component {
         return (
             <div>
                 <div className={this.state.main}>
-                    <p className={this.state.titleShow}>LogDNA Oracle</p>
+                    <p className={this.state.titleShow}>LogDNA Mystic</p>
                     <form className={this.state.searchbar + ' ' + this.state.fixed} onSubmit={ (e) => {
                         e.preventDefault();
                        if (this.state.domain !== '') {
@@ -198,36 +233,57 @@ class Body extends Component {
                             <input id="domain" autoComplete="off" action="" className="search-bar" type="text" placeholder="Company Domain" onChange={this.storeValues}/>
                             <input id="name" autoComplete="off" action="" className="search-bar" type="text" placeholder="Employee Name (Optional)" onChange={this.storeValues}/>
                             <input id="limit" autoComplete="off" action="" className="search-bar limit" type="number" placeholder="Limit" onChange={this.storeValues}/>
-                            <input id="fileInput" style={{display: 'none'}} type="file" onChange={ () => {
-                                this.uploadFile(response => {
-                                    this.slideMain();
-                                    for (var key in response) {
-                                        var company = response[key];
-                                        for (var i = 0; i < company.length; i++) {
-                                            var lead = company[i];
-                                            this.setState({
-                                                emailcache: [...this.state.emailcache, lead.email]
-                                            });
+                            <input id="fileInput" style={{display: 'none'}} type="file" 
+                                onChange={ () => {
+                                    this.uploadFile(response => {
+                                        this.slideMain();
+                                        console.log(response);
+                                        // for (var key in response) {
+                                        //     var company = response[key];
+                                        //     for (var i = 0; i < company.length; i++) {
+                                        //         var lead = company[i];
+                                        //         this.setState({
+                                        //             emailcache: [...this.state.emailcache, lead.email]
+                                        //         });
+                                        //     }
+                                        // }
+                                        for (var i = 0; i < response.length; i++) {
+                                            var company = response[i];
+                                            for (var j = 0; j < company.length; j++) {
+                                                var lead = company[j];
+                                                this.setState({
+                                                    emailcache: [...this.state.emailcache, lead.email]
+                                                })
+                                            }
+                                            var companyKey = response[i][0].keyURL || response[i][0].keyurl;
+                                            if (!this.state.keys.includes(companyKey)) {
+                                                this.state.data.push(response[i]);
+                                            }
                                         }
-                                    }
-                                    this.setState({
-                                        json: Object.assign(this.state.json, response)
+                                        this.setState({
+                                            data: this.state.data
+                                        }, () => {
+                                            console.log(this.state.data);
+                                            this.createTables();
+                                        });
+                                        // this.setState({
+                                        //     json: Object.assign(this.state.json, response)
+                                        // });
+                                        console.log(this.state.emailcache);
+                                        // console.log(this.state.json);
                                     });
-                                    console.log(this.state.emailcache);
-                                    console.log(this.state.json);
-                                });
-                            }}/>
+                                }}
+                            />
                             <a id="csv" href="../../../../../server/result.csv" style={{display: 'none'}}>CSV</a>
                             <Button type="submit" style={{"position": "absolute", "left": "-9999px"}}><Glyphicon glyph="search"></Glyphicon></Button>
                             <Button style={{marginLeft: '20px'}} onClick={this.inputFile}> Import CSV </Button>
                             <Button style={{marginLeft: '20px'}} onClick={() => {
-                                var jsonData = this.state.json;
+                                var jsonData = this.state.data;
                                 axios.post('http://localhost:4000/export', {
                                     data: jsonData
                                 })
                                 .then(response => {
                                     console.log(response);
-                                    this.downloadCSV();
                                 })
                             }}> Export CSV </Button>
                         </FormGroup>
@@ -235,14 +291,7 @@ class Body extends Component {
                 </div>
 
                 <div className={this.state.table + ' ' + this.state.searching}>
-                    {Object.keys(this.state.json).map(key => {
-                        var data = this.state.json[key];
-                        if (data) {
-                            return (
-                                <Table data={data} keyValue={key} tableHandler={this.tableHandler}/>
-                            )
-                        }
-                    })}
+                    {this.state.tables}
                 </div>
             </div>
 
