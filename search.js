@@ -809,7 +809,7 @@ function clearBitAPI(payload, filter, callback) { // pinging prospector api
             }
         });
     } else {
-        console.log('well shit');
+        console.log('oops');
         return callback(null, payload);
     }
 }
