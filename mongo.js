@@ -7,8 +7,8 @@ const _ = require('lodash');
 var db = ld.createMongooseConnection();
 var Leads = models.Leads.getModel(db);
 leads.init(Leads);
-
-exports.create = function(original, callback) {
+// creates a mongo object
+exports.create = function(original, callback) { // takes in raw clearbit data, in the form of an array of json objects
     console.log('AT CREATION');
     //console.log('ORIGINAL: %j', original);
     var newData = [];
@@ -53,7 +53,7 @@ exports.create = function(original, callback) {
         // if (withdotcom.substring(withdotcom.length - 2, withdotcom.length) === 'co') {
         //   withdotcom = withdotcom + "m";
         // }
-        for (var j = 0; j < original.result.length; j++) {
+        for (var j = 0; j < original.result.length; j++) { // push the raw data into a format that we can use to put into mongo
             newData.push({
                 'company': original.companyDetails.company
                 , 'firstname': original.result[j].firstname
@@ -73,8 +73,8 @@ exports.create = function(original, callback) {
             });
         }
     }
-    //console.log('NEW DATA: %j',newData);
-
+    // console.log('NEW DATA: %j',newData);
+    // create a mongo object
     async.each(newData, function(item, cb) {
         console.log('item ' + JSON.stringify(item, null, 2));
         leads.create(item.company, item.url, item.keyurl, item.reason, item.firstname, item.lastname, item.title, item.email, item.linkedin, item.twitter, item.facebook, item.address, item.size, item.status, function(err, doc) {
@@ -85,7 +85,7 @@ exports.create = function(original, callback) {
                 cb();
             }
         });
-    }, function(err) {
+    }, function(err) { // callback, if there's an error, return the error, if not, return the formatted data to use for the table display and export csv
         if (err) {
             console.log('Error: %j', err);
             return callback(err);
@@ -95,9 +95,10 @@ exports.create = function(original, callback) {
         }
     });
 };
-
-exports.getAndUpdate = function(URL, callback) {
+// function that runs first to check if things are in mongo or not
+exports.getAndUpdate = function(URL, callback) { // takes in the url
   console.log('at getandupdate');
+  // parsing the url to get the domain with and without the dot com
   var website = URL;
   var nodotcom;
   var withdotcom;
@@ -141,24 +142,25 @@ exports.getAndUpdate = function(URL, callback) {
     }
   }
   else {
-    return callback("Can't find website");
+    return callback("Can't find website"); // return an error that says can't find website
   }
   console.log('checking if things are in mongo!');
+  // first try the domain with the dot com, then without the dot com
   leads.get({keyURL: withdotcom}, function(err, doc){
     if (err) {
       console.log('trying again');
       leads.get({keyURL: nodotcom}, function(err, doc){
         if (err) {
-          console.log('Cant find anything');
+          console.log('Cant find anything'); // second search doesn't return anything, then return the error
           return callback(err);
         }
         else {
-          flatten(doc, nodotcom, function(err, result){
+          flatten(doc, nodotcom, function(err, result){ // flattens the mongo results so that we can update mongo
             if (err) {
               return callback(err);
             }
             else {
-              return callback(null,result);
+              return callback(null,result); //returns the new result
             }
           });
         }
@@ -184,19 +186,19 @@ var flatten = function(arr, url, callback) {
   // console.log(leadsArr);
   var peopleArr = [];
   for (var i = 0; i < arr.length; i++) {
-    if(arr[i].status === "New!" || arr[i].status === "New to Mongo!") {
+    if(arr[i].status === "New!" || arr[i].status === "New to Mongo!") { // to see if the mongo results contains leads that have new
       var leadsObj = {};
       leadsObj.email = arr[i].email;
       peopleArr.push(leadsObj);
     }
   }
   if (peopleArr.length === 0) {
-    return callback(null, arr);
+    return callback(null, arr); // returns the original array because no changes are made
   }
   else {
     async.each(peopleArr, function(item, cb) {
         //console.log('item ' + JSON.stringify(item, null, 2));
-        leads.update({email: item.email}, { $set: {status: "In Oracle"}}, function(err, doc) {
+        leads.update({email: item.email}, { $set: {status: "In Oracle"}}, function(err, doc) { // update the status of said mongo object to in oracle
             if (err) {
                 console.log('Error in updating mongo: %j', err);
                 cb(err);
@@ -209,7 +211,7 @@ var flatten = function(arr, url, callback) {
           console.log('Error: %j', err);
           return callback(err);
         } else {
-          leads.get({keyURL: url}, function(err, doc){
+          leads.get({keyURL: url}, function(err, doc){ // do a search for get the leads with the new status
             return callback(null, doc);
           });
         }

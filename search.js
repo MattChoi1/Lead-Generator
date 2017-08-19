@@ -875,11 +875,11 @@ exports.search = function(company, callback) {
     var customLimit = company.limit;
 
     if (url) {
-        mongoo.getAndUpdate(url, function(err, doc){
+        mongoo.getAndUpdate(url, function(err, doc){ // first doing a check if the company exists in mongo or not
             if (doc) {
-                return callback(null, doc);
+                return callback(null, doc); // if it exists, returns all the leads for that company and displays it
             }
-            else {
+            else { // if it doesn't, it runs a clearbit search
                 var result = [];
                 var emailcache = [];
                 var companyDetails = {};
