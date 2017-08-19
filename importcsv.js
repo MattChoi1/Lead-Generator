@@ -9,7 +9,7 @@ const _ = require('lodash');
 var companies = [];
 
 
-exports.getWebsites = function(csvstring, callback) {
+exports.getWebsites = function(csvstring, callback) { // get websites from CSV
     var string = csvstring;
     csv()
     .fromString(string || 'hello')
@@ -47,7 +47,7 @@ exports.getWebsites = function(csvstring, callback) {
     });
 };
 
-function start(companies, callback) {
+function start(companies, callback) { // start sending things to search.js to get results (whether from mongo or clearbit)
     console.log('list of companies bro: ' + JSON.stringify(companies, null, 2));
     async.map(companies, clearbit.search, function(err, core) { //result is now core
         if (err) {
@@ -55,6 +55,7 @@ function start(companies, callback) {
             return;
         }
         var unique = [];
+        // formatting the data to use with the table display
         for (var i = 0; i < core.length; i++) {
             var company = core[i];
             if (!unique.includes(company)) {
