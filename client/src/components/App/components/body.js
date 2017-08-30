@@ -57,10 +57,12 @@ class Body extends Component {
                 reader.readAsText(file);
                 reader.onload = () => {
                     console.log(reader.result);
+                    this.grayoutWhenSearching(true);
                     axios.post('/csv', {
                         csvString: reader.result
                     })
                     .then(response => {
+                        this.grayoutWhenSearching(false);
                         callback(response.data);
                     })
                 }
@@ -177,7 +179,7 @@ class Body extends Component {
                 if (!this.state.keys.includes(companyKey)) {
                     this.state.data.push(response.data);
                 }
-            } 
+            }
             this.setState({
                 data: this.state.data
             }, () => {
@@ -233,7 +235,7 @@ class Body extends Component {
                             <input id="domain" autoComplete="off" action="" className="search-bar" type="text" placeholder="Company Domain" onChange={this.storeValues}/>
                             <input id="name" autoComplete="off" action="" className="search-bar" type="text" placeholder="Employee Name (Optional)" onChange={this.storeValues}/>
                             <input id="limit" autoComplete="off" action="" className="search-bar limit" type="number" placeholder="Limit" onChange={this.storeValues}/>
-                            <input id="fileInput" style={{display: 'none'}} type="file" 
+                            <input id="fileInput" style={{display: 'none'}} type="file"
                                 onChange={ () => {
                                     this.uploadFile(response => {
                                         this.slideMain();
@@ -249,15 +251,22 @@ class Body extends Component {
                                         // }
                                         for (var i = 0; i < response.length; i++) {
                                             var company = response[i];
+
                                             for (var j = 0; j < company.length; j++) {
                                                 var lead = company[j];
                                                 this.setState({
                                                     emailcache: [...this.state.emailcache, lead.email]
                                                 })
                                             }
-                                            var companyKey = response[i][0].keyURL || response[i][0].keyurl;
-                                            if (!this.state.keys.includes(companyKey)) {
-                                                this.state.data.push(response[i]);
+                                            if (company[0]) {
+                                                if (company[0].keyURL) {
+                                                    var companyKey = company[0].keyURL
+                                                } else if (response[i][0].keyurl) {
+                                                    var companyKey = company[0].keyurl
+                                                }
+                                                if (!this.state.keys.includes(companyKey)) {
+                                                    this.state.data.push(company);
+                                                }
                                             }
                                         }
                                         this.setState({
@@ -293,6 +302,7 @@ class Body extends Component {
                 <div className={this.state.table + ' ' + this.state.searching}>
                     {this.state.tables}
                 </div>
+
             </div>
 
         )

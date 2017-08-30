@@ -1,8 +1,7 @@
 require('../absecret');
 const async = require('async');
 
-const clearbitEnrich = require('clearbit')(__keys.clearbitAPI);
-const clearbitProspect = require('clearbit')(__keys.clearbitAPI);
+const clearbit = require('clearbit')(__keys.clearbitAPI);
 const _ = require('lodash');
 const mongoo = require('./mongo.js');
 var companyDomain;
@@ -720,7 +719,7 @@ var stop;
 /*
 var extraInfo = function (prospectemail, callback) { // finding linkedin and twitters
     console.log('prospectemail: ' +prospectemail);
-    clearbitEnrich.Person.find({email: prospectemail, timeout: 30000}) // using enrichment api to find extra stuff
+    clearbit.Person.find({email: prospectemail, timeout: 30000}) // using enrichment api to find extra stuff
     .then(function (person) {
         var linkedin;
         var twitter;
@@ -791,7 +790,7 @@ function clearBitAPI(payload, filter, callback) { // pinging prospector api
     if (payload.currentCount <= payload.stop && filter) {
         filter.domain = payload.url;
         filter.timeout = 30000;
-        clearbitProspect.Prospector.search(filter)
+        clearbit.Prospector.search(filter)
         .then(function(people) {
             payload.currentCount += people.length; // getting the current count and adding the number of people searched through prospector
             //console.log('currentcount: ' + payload.currentCount);
@@ -804,8 +803,12 @@ function clearBitAPI(payload, filter, callback) { // pinging prospector api
                 console.log('calling clearbitapi again!');
                 clearBitAPI(payload, filter, callback);
             }
+            else if (error.indexOf('limit') != -1) {
+                console.log('Late limit exceeded. Trying Again after 60 seconds');
+                setTimeout(clearBitAPI(payload, filter, callback), 10000);
+            }
             else {
-                console.log('what is this claerbitapi error: ' + err);
+                console.log('what is this clearbitapi error: ' + err);
                 return callback(err);
             }
         });
@@ -877,6 +880,7 @@ exports.search = function(company, callback) {
     if (url) {
         mongoo.getAndUpdate(url, function(err, doc){ // first doing a check if the company exists in mongo or not
             if (doc) {
+                console.log('@@@@@@@@@@@@@@@@@DOC@@@@@@@@@@@@@@@: ' + doc);
                 return callback(null, doc); // if it exists, returns all the leads for that company and displays it
             }
             else { // if it doesn't, it runs a clearbit search
@@ -921,7 +925,7 @@ exports.search = function(company, callback) {
                 });
 
                 } else {
-                    clearbitEnrich.Company.find({ domain: payload.url, timeout: 30000 }) // getting company size and other information about a company
+                    clearbit.Company.find({ domain: payload.url }) // getting company size and other information about a company
                     .then(function(company) {
                     payload.companyDetails.size = company.metrics.employeesRange;
                     payload.companyDetails.address = (company.geo.streetNumber || '') + ' ' + (company.geo.streetName || '') + ' ' + (company.geo.city || '') + ' ' + (company.geo.state || '') + ' ' + (company.geo.postalCode || '');
@@ -935,6 +939,9 @@ exports.search = function(company, callback) {
 
                          // return callback(err, resulty);
                         });
+                    })
+                    .catch(clearbit.Company.NotFoundError, function(err) {
+                        console.log(payload.url + ': this company is not found in Clearbit');
                     });
                 }
             }

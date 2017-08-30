@@ -1,37 +1,39 @@
-var express = require('express');
-var cors = require('cors');
-var bodyParser = require('body-parser');
-var csv = require('./importcsv');
-var exportCsv = require('./exportcsv');
-var leads = require('./leads');
-var fs = require('fs');
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const csv = require('./importcsv');
+const exportCsv = require('./exportcsv');
+const leads = require('./leads');
+const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const secret = require('../absecret');
 
-function proxyToSecure(req, res) {
-  res.writeHead(301, {
-    'Location': 'https://' + req.headers.host + req.url
-  });
-  res.end();
-}
-
-var app = express();
-var oracle = require('./search.js');
+const app = express();
+const oracle = require('./search.js');
+const timeout = require('connect-timeout');
 
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(__dirname + '/client/build'));
+app.use(timeout(300000));
+
+const proxyToSecure = function(req, res) {
+  res.writeHead(301, {
+    'Location': 'https://' + req.headers.host + req.url
+  });
+  res.end();
+};
 
 app.get('/download', function(req, res) {
   console.log('Download path working');
   var file = __dirname + '/result.csv';
   res.download(file);
-})
+});
 
-app.get('*', function(req, res) {
+app.get('/', function(req, res) {
   res.sendFile(__dirname + '/client/build/index.html');
-})
+});
 
 app.post('/csv', function (req, res) {
   var csvString = req.body.csvString;
@@ -61,12 +63,12 @@ app.post('/export', function(req, res) {
 app.post('/lead', function(req, res) {
   var object = req.body.data;
   console.log(object);
-  leads.create(object.company, object.url, object.keyURL, object.reason, object.firstname, object.lastname, object.title, 
+  leads.create(object.company, object.url, object.keyURL, object.reason, object.firstname, object.lastname, object.title,
     object.email, object.linkined, object.twitter, object.facebook, object.location, object.companySize, object.status, function() {
     console.log('Item updated');
     res.end();
   });
-})
+});
 
 app.post('/', function (req, res) {
     console.log('req: ' + req.body.data);
@@ -95,10 +97,10 @@ app.post('/', function (req, res) {
   });
 });
 
-var httpsServer = https.createServer(secret.ldcredentials, app).listen(443, function() {
+https.createServer(secret.ldcredentials, app).listen(443, function() {
   console.log('https server running on port 443');
-})
+});
 
-var server = http.createServer(proxyToSecure).listen(80, function() {
+http.createServer(proxyToSecure).listen(80, function() {
   console.log('http server running on port 80');
 });

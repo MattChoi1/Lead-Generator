@@ -4,6 +4,7 @@ const clearbit = require('./search.js');
 const tocsv = require('./exportcsv.js');
 const async = require('async');
 const _ = require('lodash');
+const urlparse = require('url-parse');
 
 
 var companies = [];
@@ -17,6 +18,7 @@ exports.getWebsites = function(csvstring, callback) { // get websites from CSV
         // combine csv header row and csv line to a json object
         // jsonObj.a ==> 1 or 4
         var url = jsonObj['Websites'] || jsonObj['Website']; // parsing the imported csv and getting objects
+        url = urlparse(url).hostname.replace('www.','');
         var size = jsonObj['Number of Employees'] || jsonObj['Company Size'];
         var extrainfo = jsonObj['Extra'];
         var companylocation = jsonObj['Headquarters Location'] || jsonObj['Location'];
@@ -42,6 +44,7 @@ exports.getWebsites = function(csvstring, callback) { // get websites from CSV
            console.log('Error occured converting from csv to json: ' + error);
         }
         start(companies, function(result) {
+            console.log('GET WEBSITE IN IMPORTCSV BEFORE CALLBACK');
             callback(result);
         });
     });
@@ -62,7 +65,7 @@ function start(companies, callback) { // start sending things to search.js to ge
                 unique.push(company);
             }
         }
-        console.log(unique);
+        console.log('START IN IMPORTCSV BEFORE CALLBACK');
         callback(unique);
     });
 }
