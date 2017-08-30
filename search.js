@@ -805,7 +805,8 @@ function clearBitAPI(payload, filter, callback) { // pinging prospector api
             }
             else if (error.indexOf('limit') != -1) {
                 console.log('Late limit exceeded. Trying Again after 60 seconds');
-                setTimeout(clearBitAPI(payload, filter, callback), 10000);
+                //setTimeout(clearBitAPI(payload, filter, callback), 10000);
+                return 'Too Many Clearbit API Calls:' + Date.now();
             }
             else {
                 console.log('what is this clearbitapi error: ' + err);
@@ -919,6 +920,9 @@ exports.search = function(company, callback) {
                 payload.companyDetails.url = url;
                 payload.companyDetails.company = name;
                 findLeads(payload, function(err, resulty) {
+                    if (err) {
+                        return callback(err);
+                    }
                     console.log('resulty: ' + JSON.stringify(resulty, null, 2));
                     mongoo.create(resulty, callback);
                     // return callback(err, resulty);
@@ -934,6 +938,9 @@ exports.search = function(company, callback) {
                     console.log('Company Size: ' + payload.size);
                     console.log('Payload: ' + JSON.stringify(payload));
                     findLeads(payload, function(err, resulty) {
+                        if (err) {
+                            return callback(err);
+                        }
                         console.log('resulty: ' + JSON.stringify(resulty, null, 2));
                         mongoo.create(resulty, callback);
 

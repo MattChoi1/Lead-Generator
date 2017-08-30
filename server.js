@@ -38,9 +38,14 @@ app.get('/', function(req, res) {
 app.post('/csv', function (req, res) {
   var csvString = req.body.csvString;
   console.log(csvString);
-  csv.getWebsites(csvString, function(results) {
-    console.log('getWebsites passes to server');
-    res.send(results);
+  csv.getWebsites(csvString, function(err, results) {
+    if (err) {
+        res.send(err);
+    }
+    else {
+        console.log('getWebsites passes to server');
+        res.send(results);
+    }
   });
 });
 
@@ -84,7 +89,7 @@ app.post('/', function (req, res) {
   console.log('req.headers: ' + JSON.stringify(req.headers));
   oracle.search(payload, function(err, result) {
     if (err) {
-        return;
+        return res.send(err);
     }
     var object = {};
     if (result.length) {

@@ -29,6 +29,7 @@ class Body extends Component {
             , fixed: ""
             , smallLogo: "smallLogo"
             , hide: "hide"
+            , waitAMinute: false
         };
         this.storeValues = this.storeValues.bind(this);
         this.submitToServer = this.submitToServer.bind(this);
@@ -37,6 +38,7 @@ class Body extends Component {
         this.resetJSOBNState = this.notSearchedYet.bind(this);
         this.grayoutWhenSearching = this.grayoutWhenSearching.bind(this);
         this.tableHandler = this.tableHandler.bind(this);
+        this.sorryMessage = this.sorryMessage.bind(this);
     }
 
     inputFile() {
@@ -48,6 +50,9 @@ class Body extends Component {
     }
 
     uploadFile(callback) {
+        this.setState({
+            waitAMinute: false
+        })
         var files = document.getElementById('fileInput').files;
         if (files) {
             var file = files[0] ? files[0] : false;
@@ -62,6 +67,11 @@ class Body extends Component {
                         csvString: reader.result
                     })
                     .then(response => {
+                        if (response.toString().indexOf('Too Many Clearbit API Calls:') != -1) {
+                            this.setState({
+                                waitAMinute: true
+                            })
+                        }
                         this.grayoutWhenSearching(false);
                         callback(response.data);
                     })
@@ -146,7 +156,9 @@ class Body extends Component {
         var clientBody = this;
 
         this.grayoutWhenSearching(true);
-
+        this.setState({
+            waitAMinute: false
+        })
         var payload = {};
         payload.domain = this.state.domain;
         payload.name = this.state.name;
@@ -210,6 +222,14 @@ class Body extends Component {
                 this.originalMain();
             }
         });
+    }
+
+    sorryMessage(sorry) {
+        if(sorry){
+            return <p> Previous file was too big. Please try a smaller file and wait for a minute. Sorry man </p>
+        } else {
+            return;
+        }
     }
 
 
@@ -298,7 +318,9 @@ class Body extends Component {
                         </FormGroup>
                     </form>
                 </div>
-
+                <div>
+                    {this.sorryMessage(this.state.waitAMinute)}
+                </div>
                 <div className={this.state.table + ' ' + this.state.searching}>
                     {this.state.tables}
                 </div>

@@ -43,9 +43,12 @@ exports.getWebsites = function(csvstring, callback) { // get websites from CSV
         if (error) {
            console.log('Error occured converting from csv to json: ' + error);
         }
-        start(companies, function(result) {
+        start(companies, function(err, result) {
+            if (err) {
+                return callback(err);
+            }
             console.log('GET WEBSITE IN IMPORTCSV BEFORE CALLBACK');
-            callback(result);
+            callback(null, result);
         });
     });
 };
@@ -55,7 +58,7 @@ function start(companies, callback) { // start sending things to search.js to ge
     async.map(companies, clearbit.search, function(err, core) { //result is now core
         if (err) {
             console.log('Error: %j', err);
-            return;
+            return callback(err);
         }
         var unique = [];
         // formatting the data to use with the table display
@@ -66,7 +69,7 @@ function start(companies, callback) { // start sending things to search.js to ge
             }
         }
         console.log('START IN IMPORTCSV BEFORE CALLBACK');
-        callback(unique);
+        callback(null, unique);
     });
 }
 
