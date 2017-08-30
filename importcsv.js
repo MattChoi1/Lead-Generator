@@ -36,7 +36,7 @@ exports.getWebsites = function(csvstring, callback) { // get websites from CSV
             companies.push(company);
         }
 
-        console.log('each company: ' + company);
+        //console.log('each company: ' + company);
     })
     .on('done', (error)=>{
         console.log('Companies: ' + companies);
@@ -51,7 +51,7 @@ exports.getWebsites = function(csvstring, callback) { // get websites from CSV
 };
 
 function start(companies, callback) { // start sending things to search.js to get results (whether from mongo or clearbit)
-    console.log('list of companies bro: ' + JSON.stringify(companies, null, 2));
+    //console.log('list of companies bro: ' + JSON.stringify(companies, null, 2));
     async.map(companies, clearbit.search, function(err, core) { //result is now core
         if (err) {
             console.log('Error: %j', err);

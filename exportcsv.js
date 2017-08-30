@@ -9,7 +9,7 @@ exports.go = function(data, callback) { // exporting the parsed data into a csv
     var company = data[j];
     for (var i = 0; i < company.length; i++) {
       next = company[i];
-      console.log(next);
+      // console.log(next);
       // next = data[i];
       // for (var j = 0; j < next.length; j++) {
           newData.push({
