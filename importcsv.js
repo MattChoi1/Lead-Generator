@@ -47,7 +47,6 @@ exports.getWebsites = function(csvstring, callback) { // get websites from CSV
             if (err) {
                 return callback(err);
             }
-            console.log('GET WEBSITE IN IMPORTCSV BEFORE CALLBACK');
             callback(null, result);
         });
     });
@@ -68,7 +67,6 @@ function start(companies, callback) { // start sending things to search.js to ge
                 unique.push(company);
             }
         }
-        console.log('START IN IMPORTCSV BEFORE CALLBACK');
         callback(null, unique);
     });
 }

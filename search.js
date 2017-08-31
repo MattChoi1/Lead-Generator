@@ -814,7 +814,6 @@ function clearBitAPI(payload, filter, callback) { // pinging prospector api
             }
         });
     } else {
-        console.log('oops');
         return callback(null, payload);
     }
 }
@@ -824,7 +823,6 @@ function go(filterArray, payload, callback) { // pings clearbit and then procces
         if (err) {
             return callback(err);
         }
-        console.log('done filtering!');
         async.transform(payload.total, payload, processIndividuals, function(err, result) {
             delete result.total;
             console.log('done finding info!');
@@ -881,7 +879,7 @@ exports.search = function(company, callback) {
     if (url) {
         mongoo.getAndUpdate(url, function(err, doc){ // first doing a check if the company exists in mongo or not
             if (doc) {
-                console.log('@@@@@@@@@@@@@@@@@DOC@@@@@@@@@@@@@@@: ' + doc);
+                console.log('FOUND DATA MONGO DB: ' + url);
                 return callback(null, doc); // if it exists, returns all the leads for that company and displays it
             }
             else { // if it doesn't, it runs a clearbit search
@@ -923,7 +921,7 @@ exports.search = function(company, callback) {
                     if (err) {
                         return callback(err);
                     }
-                    console.log('resulty: ' + JSON.stringify(resulty, null, 2));
+                    //console.log('result: ' + JSON.stringify(resulty, null, 2));
                     mongoo.create(resulty, callback);
                     // return callback(err, resulty);
                 });
@@ -936,12 +934,11 @@ exports.search = function(company, callback) {
                     payload.companyDetails.url = company.domain;
                     payload.companyDetails.company = company.legalName || company.name;
                     console.log('Company Size: ' + payload.size);
-                    console.log('Payload: ' + JSON.stringify(payload));
                     findLeads(payload, function(err, resulty) {
                         if (err) {
                             return callback(err);
                         }
-                        console.log('resulty: ' + JSON.stringify(resulty, null, 2));
+                        console.log('result: ' + JSON.stringify(resulty, null, 2));
                         mongoo.create(resulty, callback);
 
                          // return callback(err, resulty);

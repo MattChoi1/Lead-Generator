@@ -39,6 +39,7 @@ class Body extends Component {
         this.grayoutWhenSearching = this.grayoutWhenSearching.bind(this);
         this.tableHandler = this.tableHandler.bind(this);
         this.sorryMessage = this.sorryMessage.bind(this);
+        this.reset = this.reset.bind(this);
     }
 
     inputFile() {
@@ -152,6 +153,30 @@ class Body extends Component {
         }
     }
 
+    reset(e) {
+         this.setState({
+            domain: ''
+            , name: ''
+            , limit: ''
+            , backgroundActive: "background"
+            , main: "main"
+            , titleShow: "title"
+            , table: "result-hidden"
+            , json: {}
+            , data: []
+            , tables: []
+            , keys: []
+            , emailcache: ['default']
+            , searchbar: "searchbar-wrapper"
+            , searching: ""
+            , fixed: ""
+            , smallLogo: "smallLogo"
+            , hide: "hide"
+            , waitAMinute: false
+        });
+        console.log('RESETTED');
+    }
+
     submitToServer(e) {
         var clientBody = this;
 
@@ -260,7 +285,7 @@ class Body extends Component {
                                     this.uploadFile(response => {
                                         this.slideMain();
                                         console.log(response);
-                                        // for (var key in response) {
+                                         // for (var key in response) {
                                         //     var company = response[key];
                                         //     for (var i = 0; i < company.length; i++) {
                                         //         var lead = company[i];
@@ -315,6 +340,7 @@ class Body extends Component {
                                     document.getElementById('csv').click();
                                 })
                             }}> Export CSV </Button>
+                            <Button onClick={this.reset}> Refresh </Button>
                         </FormGroup>
                     </form>
                 </div>
