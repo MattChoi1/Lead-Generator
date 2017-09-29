@@ -80,7 +80,7 @@ class Table extends Component {
     render() {
         const columns = [
             {Header: 'Company', accessor: 'company'},
-            {Header: 'Name', id: 'full', accessor: d => 
+            {Header: 'Name', id: 'full', accessor: d =>
                 <div
                     dangerouslySetInnerHTML={{
                         __html: (d.firstname || '--') + ' ' + (d.lastname || '')

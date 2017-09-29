@@ -6,7 +6,7 @@ import ReactTable from 'react-table';
 import {CSVLink, CSVDownload} from 'react-csv';
 import axios from 'axios';
 import Table from './table.js';
-
+var development = (process.env.NODE_ENV === 'development');
 class Body extends Component {
 
     constructor(props) {
@@ -23,23 +23,24 @@ class Body extends Component {
             , data: []
             , tables: []
             , keys: []
-            , emailcache: ['default']
             , searchbar: "searchbar-wrapper"
             , searching: ""
             , fixed: ""
             , smallLogo: "smallLogo"
             , hide: "hide"
-            , waitAMinute: false
+            , fileTooBig: false
+            , loadingBubbles: false
+            , noCompanyFound: false
         };
         this.storeValues = this.storeValues.bind(this);
         this.submitToServer = this.submitToServer.bind(this);
         this.slideMain = this.slideMain.bind(this);
         this.originalMain = this.originalMain.bind(this);
-        this.resetJSOBNState = this.notSearchedYet.bind(this);
         this.grayoutWhenSearching = this.grayoutWhenSearching.bind(this);
         this.tableHandler = this.tableHandler.bind(this);
         this.sorryMessage = this.sorryMessage.bind(this);
         this.reset = this.reset.bind(this);
+        this.noCompanyFoundMessage = this.noCompanyFoundMessage.bind(this);
     }
 
     inputFile() {
@@ -49,28 +50,34 @@ class Body extends Component {
     downloadCSV() {
         document.getElementById('csv').click();
     }
+/*
+    componentDidUpdate() {
+        console.log('Current Data: ' + this.state.data);
+        console.log('Current Tables: ' + this.state.tables);
+        console.log('Current keys: ' + this.state.keys);
+    }*/
 
     uploadFile(callback) {
         this.setState({
-            waitAMinute: false
+            fileTooBig: false
         })
         var files = document.getElementById('fileInput').files;
         if (files) {
             var file = files[0] ? files[0] : false;
-            console.log(file);
+            //console.log(file);
             if (file) {
                 var reader = new FileReader();
                 reader.readAsText(file);
                 reader.onload = () => {
-                    console.log(reader.result);
+                    //console.log(reader.result);
                     this.grayoutWhenSearching(true);
-                    axios.post('/csv', {
+                    axios.post((development)?'https://localhost.logdna.com/csv' : '/csv', {
                         csvString: reader.result
                     })
                     .then(response => {
                         if (response.toString().indexOf('Too Many Clearbit API Calls:') != -1) {
                             this.setState({
-                                waitAMinute: true
+                                fileTooBig: true
                             })
                         }
                         this.grayoutWhenSearching(false);
@@ -96,14 +103,16 @@ class Body extends Component {
             var index = i;
             var key = data[0].keyURL || data[0].keyurl;
             if (this.state.keys.indexOf(key) === -1) {
-                this.state.keys.push(key);
+                this.setState({
+                    keys: [...this.state.keys, key]
+                })
             }
             newTables.push(<Table data={data} key={key} index={index} tableHandler={this.tableHandler}/>);
         }
         this.setState({
             tables: newTables
         }, function() {
-            console.log(this.state.tables);
+            //console.log(this.state.tables);
         });
     }
 
@@ -133,22 +142,18 @@ class Body extends Component {
 
     }
 
-    notSearchedYet(email) {
-        if (this.state.emailcache.indexOf(email) === -1) {
-            return true;
-        }
-        return false;
-    }
 
     grayoutWhenSearching(searching) {
-        console.log('Searching: ' + searching);
+        //console.log('Searching: ' + searching);
         if (searching) {
             this.setState({
-                searching: "transparent"
+                searching: "transparent",
+                loadingBubbles: true
             });
         } else {
             this.setState({
-                searching: ""
+                searching: "",
+                loadingBubbles: false
             });
         }
     }
@@ -166,15 +171,13 @@ class Body extends Component {
             , data: []
             , tables: []
             , keys: []
-            , emailcache: ['default']
             , searchbar: "searchbar-wrapper"
             , searching: ""
             , fixed: ""
             , smallLogo: "smallLogo"
             , hide: "hide"
-            , waitAMinute: false
+            , fileTooBig: false
         });
-        console.log('RESETTED');
     }
 
     submitToServer(e) {
@@ -182,47 +185,32 @@ class Body extends Component {
 
         this.grayoutWhenSearching(true);
         this.setState({
-            waitAMinute: false
+            fileTooBig: false
         })
         var payload = {};
         payload.domain = this.state.domain;
         payload.name = this.state.name;
         payload.limit = this.state.limit;
-        axios.post('/', {
+        axios.post((development)? 'https://localhost.logdna.com/' : '/', {
             data: payload
         })
         .then(response => {
-            console.log(response.data);
-            for(var i=0; i<response.data.length; i++) {
-                var leadEmail = response.data[i].email;
-                if(this.notSearchedYet(leadEmail)){
-                    this.setState({
-                        emailcache: [...this.state.emailcache, leadEmail]
-                    })
-                }
-            }
-            // delete this.state.json[key[0]]
-            // var anotherOne = this.state.json
-            // this.setState({
-            //     json: anotherOne
-            // })
-            // var anotherOne = Object.assign(this.state.json, response.data);
-            // this.setState({
-            //     json: anotherOne
-            // })
-            // console.log('json: %j', this.state.json);
             if (response.data.length) {
                 var companyKey = response.data[0].keyURL || response.data[0].keyurl;
                 if (!this.state.keys.includes(companyKey)) {
-                    this.state.data.push(response.data);
+                    this.setState({
+                        data: [...this.state.data, response.data]
+                    }, () => {
+                        this.createTables();
+                    });
                 }
+            } else {
+                this.setState({
+                    noCompanyFound:true
+                }, setTimeout(this.state({
+                    noCompanyFound:false
+                })), 3000);
             }
-            this.setState({
-                data: this.state.data
-            }, () => {
-                console.log(this.state.data);
-                this.createTables();
-            });
             this.grayoutWhenSearching(false);
         })
         .catch(error => {
@@ -233,7 +221,6 @@ class Body extends Component {
     }
 
     tableHandler(index) {
-        console.log(index);
         var companyKey = this.state.data[index][0].keyURL || this.state.data[index][0].keyurl;
         var indexOfKey = this.state.keys.indexOf(companyKey);
         this.state.keys.splice(indexOfKey, 1);
@@ -241,7 +228,7 @@ class Body extends Component {
         this.setState({
             data: this.state.data
         }, function() {
-            console.log(this.state.data);
+            //console.log(this.state.data);
             this.createTables();
             if (this.state.data.length <= 0) {
                 this.originalMain();
@@ -255,6 +242,9 @@ class Body extends Component {
         } else {
             return;
         }
+    }
+    noCompanyFoundMessage() {
+        return <span> We could not find any contacts with domain </span> + this.state.domain
     }
 
 
@@ -278,31 +268,16 @@ class Body extends Component {
                         <FormGroup autoComplete="off">
                             <a className={this.state.smallLogo + ' ' + this.state.hide} href="/"><img src="https://logdna.com/assets/images/ld-logo-square-480.png" width="35px"></img></a>
                             <input id="domain" autoComplete="off" action="" className="search-bar" type="text" placeholder="Company Domain" onChange={this.storeValues}/>
-                            <input id="name" autoComplete="off" action="" className="search-bar" type="text" placeholder="Employee Name (Optional)" onChange={this.storeValues}/>
-                            <input id="limit" autoComplete="off" action="" className="search-bar limit" type="number" placeholder="Limit" onChange={this.storeValues}/>
+                            {/*<input id="name" autoComplete="off" action="" className="search-bar" type="text" placeholder="Employee Name (Optional)" onChange={this.storeValues}/>
+                            <input id="limit" autoComplete="off" action="" className="search-bar limit" type="number" placeholder="Limit" onChange={this.storeValues}/>*/}
                             <input id="fileInput" style={{display: 'none'}} type="file"
                                 onChange={ () => {
                                     this.uploadFile(response => {
                                         this.slideMain();
-                                        console.log(response);
-                                         // for (var key in response) {
-                                        //     var company = response[key];
-                                        //     for (var i = 0; i < company.length; i++) {
-                                        //         var lead = company[i];
-                                        //         this.setState({
-                                        //             emailcache: [...this.state.emailcache, lead.email]
-                                        //         });
-                                        //     }
-                                        // }
+
                                         for (var i = 0; i < response.length; i++) {
                                             var company = response[i];
 
-                                            for (var j = 0; j < company.length; j++) {
-                                                var lead = company[j];
-                                                this.setState({
-                                                    emailcache: [...this.state.emailcache, lead.email]
-                                                })
-                                            }
                                             if (company[0]) {
                                                 if (company[0].keyURL) {
                                                     var companyKey = company[0].keyURL
@@ -317,14 +292,9 @@ class Body extends Component {
                                         this.setState({
                                             data: this.state.data
                                         }, () => {
-                                            console.log(this.state.data);
                                             this.createTables();
                                         });
-                                        // this.setState({
-                                        //     json: Object.assign(this.state.json, response)
-                                        // });
-                                        console.log(this.state.emailcache);
-                                        // console.log(this.state.json);
+
                                     });
                                 }}
                             />
@@ -333,20 +303,30 @@ class Body extends Component {
                             <Button style={{marginLeft: '20px'}} onClick={this.inputFile}> Import CSV </Button>
                             <Button style={{marginLeft: '20px'}} onClick={() => {
                                 var jsonData = this.state.data;
-                                axios.post('/export', {
+                                axios.post((development)?'https://localhost.logdna.com/export' : '/export', {
                                     data: jsonData
                                 })
                                 .then(response => {
                                     document.getElementById('csv').click();
                                 })
                             }}> Export CSV </Button>
-                            <Button onClick={this.reset}> Refresh </Button>
                         </FormGroup>
+
                     </form>
                 </div>
                 <div>
-                    {this.sorryMessage(this.state.waitAMinute)}
+                    {this.sorryMessage(this.state.fileTooBig)}
                 </div>
+                <div className={this.state.loadingBubbles ? "spinner" : "hide"}>
+                  <div className="bounce1"></div>
+                  <div className="bounce2"></div>
+                  <div className="bounce3"></div>
+                </div>
+
+                <div className={this.state.noCompanyFound ? "noCompanyFoundClass" : "hide"}>
+                    {this.noCompanyFoundMessage()}
+                </div>
+
                 <div className={this.state.table + ' ' + this.state.searching}>
                     {this.state.tables}
                 </div>

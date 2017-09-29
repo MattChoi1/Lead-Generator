@@ -1,7 +1,7 @@
 require('../absecret');
 const async = require('async');
 
-const clearbit = require('clearbit')(__keys.clearbitAPI);
+const clearbit = require('clearbit')('sk_091d80f1e238ddbc3965e6a125e68460');
 const _ = require('lodash');
 const mongoo = require('./mongo.js');
 var companyDomain;
@@ -761,7 +761,7 @@ var basicInfo = function (person) { // getting basic info about people (name, em
 
 
 function processIndividuals(payload, person, index, callback) {
-    console.log('person: ' + person);
+    //console.log('person: ' + person);
     if (!payload.emailcache.includes(person.email) && person.title.indexOf('Strategy') === -1 && person.title.indexOf('Consultant') === -1) {
         payload.emailcache.push(person.email);
         var basicInfoJSON = basicInfo(person);
@@ -809,7 +809,7 @@ function clearBitAPI(payload, filter, callback) { // pinging prospector api
                 return 'Too Many Clearbit API Calls:' + Date.now();
             }
             else {
-                console.log('what is this clearbitapi error: ' + err);
+                console.log('Unaccounted error: ' + err);
                 return callback(err);
             }
         });
@@ -825,7 +825,7 @@ function go(filterArray, payload, callback) { // pings clearbit and then procces
         }
         async.transform(payload.total, payload, processIndividuals, function(err, result) {
             delete result.total;
-            console.log('done finding info!');
+            //console.log('done finding info!');
             return callback(null, result);
         });
     });
@@ -933,12 +933,12 @@ exports.search = function(company, callback) {
                     payload.companyDetails.address = (company.geo.streetNumber || '') + ' ' + (company.geo.streetName || '') + ' ' + (company.geo.city || '') + ' ' + (company.geo.state || '') + ' ' + (company.geo.postalCode || '');
                     payload.companyDetails.url = company.domain;
                     payload.companyDetails.company = company.legalName || company.name;
-                    console.log('Company Size: ' + payload.size);
+                    //console.log('Company Size: ' + payload.size);
                     findLeads(payload, function(err, resulty) {
                         if (err) {
                             return callback(err);
                         }
-                        console.log('result: ' + JSON.stringify(resulty, null, 2));
+                        //console.log('result: ' + JSON.stringify(resulty, null, 2));
                         mongoo.create(resulty, callback);
 
                          // return callback(err, resulty);

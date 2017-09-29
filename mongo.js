@@ -9,7 +9,7 @@ var Leads = models.Leads.getModel(db);
 leads.init(Leads);
 // creates a mongo object
 exports.create = function(original, callback) { // takes in raw clearbit data, in the form of an array of json objects
-    console.log('AT CREATION');
+    //console.log('AT CREATION');
     //console.log('ORIGINAL: %j', original);
     var newData = [];
     if (original) {
@@ -76,7 +76,7 @@ exports.create = function(original, callback) { // takes in raw clearbit data, i
     // console.log('NEW DATA: %j',newData);
     // create a mongo object
     async.each(newData, function(item, cb) {
-        console.log('item ' + JSON.stringify(item, null, 2));
+        //console.log('item ' + JSON.stringify(item, null, 2));
         leads.create(item.company, item.url, item.keyurl, item.reason, item.firstname, item.lastname, item.title, item.email, item.linkedin, item.twitter, item.facebook, item.address, item.size, item.status, function(err, doc) {
             if (err) {
                 console.log('Error in saving to mongo: %j', err);
@@ -90,18 +90,16 @@ exports.create = function(original, callback) { // takes in raw clearbit data, i
             console.log('Error: %j', err);
             return callback(err);
         } else {
-            console.log('Yay!');
+            //console.log('Yay!');
             return callback(null, newData);
         }
     });
 };
 // function that runs first to check if things are in mongo or not
 exports.getAndUpdate = function(URL, callback) { // takes in the url
-  console.log('at getandupdate');
+  //console.log('at getandupdate');
   // parsing the url to get the domain with and without the dot com
   var website = URL;
-  var nodotcom;
-  var withdotcom;
   if (website) {
     var wwwLocation = website.indexOf('www');
     var colonLocation = website.indexOf(':');
@@ -141,14 +139,12 @@ exports.getAndUpdate = function(URL, callback) { // takes in the url
       withdotcom = withdotcom + "m";
     }
   }
-  else {
-    return callback("Can't find website"); // return an error that says can't find website
-  }
-  console.log('checking if things are in mongo!');
+
+  //console.log('checking if things are in mongo!');
   // first try the domain with the dot com, then without the dot com
   leads.get({keyURL: withdotcom}, function(err, doc){
     if (err) {
-      console.log('trying again');
+      //console.log('trying again');
       leads.get({keyURL: nodotcom}, function(err, doc){
         if (err) {
           console.log('Cant find anything'); // second search doesn't return anything, then return the error

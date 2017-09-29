@@ -79,7 +79,8 @@ var DBModels = (function() {
             })
             .plugin(createdModifiedPlugin)
           , [
-              [{ email: 1 }, { unique: true }]
+                [{ email: 1 }, { unique: true }]
+              , [{ keyURL:1 }]
             ]
           , LOGDNA_DB
         )

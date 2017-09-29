@@ -10,6 +10,7 @@ import Foot from './components/foot.js';
 class App extends Component {
 
   render() {
+    console.log(process.env.NODE_ENV);
     return (
         <div className="Main">
             <Head />
